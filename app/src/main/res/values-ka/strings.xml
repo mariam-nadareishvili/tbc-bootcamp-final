@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Android-Bootcamp</string>
+    <string name="hello_blank_fragment">გამარჯობა, ცარიელი ფრაგმენტო</string>
+    <string name="invalid_email_format">არასწორი ელ.ფოსტის ფორმატი</string>
+    <string name="incorrect_password">პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს და შეიცავდეს ასოებსა და ციფრებს</string>
+    <string name="close">დახურვა</string>
+    <string name="title">სათაური</string>
+    <string name="author">ავტორი</string>
+    <string name="example_rating">7.7</string>
+    <string name="about_author">ავტორის შესახებ</string>
+    <string name="introduction">შესავალი</string>
+    <string name="this_book_remainds_me_of">ეს წიგნი მახსენებს</string>
+    <string name="read_now">წაკითხვა</string>
+    <string name="hello_book_lover">გამარჯობა, წიგნის მოყვარულო! 📚</string>
+    <string name="enter_email">შეიყვანეთ ელ.ფოსტა</string>
+    <string name="enter_password">შეიყვანეთ პაროლი</string>
+    <string name="remember_me">დამახსოვრება</string>
+    <string name="log_in">შესვლა</string>
+    <string name="don_t_you_have_an_account_yet">ჯერ არ გაქვთ ანგარიში?</string>
+    <string name="sign_up_here">დარეგისტრირდით აქ</string>
+    <string name="sign_out">გამოსვლა</string>
+    <string name="account">ანგარიში</string>
+    <string name="change_language">ენის შეცვლა</string>
+    <string name="sign_up">რეგისტრაცია</string>
+    <string name="firstname">სახელი</string>
+    <string name="lastname">გვარი</string>
+    <string name="date_of_birth">დაბადების თარიღი</string>
+    <string name="email">ელ.ფოსტა</string>
+    <string name="password">პაროლი</string>
+    <string name="repeat_password">გაიმეორეთ პაროლი</string>
+    <string name="create_account">ანგარიშის შექმნა</string>
+    <string name="let_s_find_your_favourite_book">მოძებნე შენი საყვარელი წიგნი</string>
+    <string name="search_by_title_author_etc">მოძებნე სათაურით, ავტორით და ა.შ.</string>
+    <string name="home">მთავარი</string>
+    <string name="search">ძებნა</string>
+    <string name="stores">მაღაზიები</string>
+    <string name="profile">პროფილი</string>
+    <string name="average_price">$%1$s</string>
+    <string name="please_fill_in_all_fields">გთხოვთ, შეავსოთ ყველა ველი</string>
+    <string name="first_name_must_contain_only_letters_and_start_with_an_uppercase_letter">სახელი უნდა შეიცავდეს მხოლოდ ასოებს და იწყებოდეს დიდი ასოთი</string>
+    <string name="last_name_must_contain_only_letters_and_start_with_an_uppercase_letter">გვარი უნდა შეიცავდეს მხოლოდ ასოებს და იწყებოდეს დიდი ასოთი</string>
+    <string name="password_must_be_at_least_6_characters_and_contain_letters_and_numbers">პაროლი უნდა იყოს მინიმუმ 6 სიმბოლოს და შეიცავდეს ასოებსა და ციფრებს</string>
+    <string name="passwords_do_not_match">პაროლები არ ემთხვევა</string>
+    <string name="please_select_your_date_of_birth">გთხოვთ აირჩიოთ თქვენი დაბადების თარიღი</string>
+
+</resources>
