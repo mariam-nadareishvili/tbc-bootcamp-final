@@ -1,8 +1,6 @@
 package com.example.android_bootcamp.presentation.screen.home
 
 import androidx.paging.PagingData
-import com.example.android_bootcamp.presentation.model.FeedBookUi
-import com.example.android_bootcamp.presentation.model.StoryUi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

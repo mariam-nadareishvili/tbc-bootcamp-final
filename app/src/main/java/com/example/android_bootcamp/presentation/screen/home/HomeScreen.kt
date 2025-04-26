@@ -38,8 +38,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.example.android_bootcamp.presentation.model.FeedBookUi
-import com.example.android_bootcamp.presentation.model.StoryUi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 

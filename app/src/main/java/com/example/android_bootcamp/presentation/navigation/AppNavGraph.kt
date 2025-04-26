@@ -6,25 +6,28 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.android_bootcamp.presentation.screen.home.HomeScreenRoute
 import com.example.android_bootcamp.presentation.screen.login.LoginScreenRoute
 import com.example.android_bootcamp.presentation.screen.register.RegisterScreenRoute
+import com.example.android_bootcamp.presentation.navigation.Screen.*
+import com.example.android_bootcamp.presentation.screen.details.BookDetailsRoute
 
 @Composable
 fun AppNavGraph(navController: NavHostController = rememberNavController()) {
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = Home
     ) {
-        composable("login") {
+        composable<Login> {
             LoginScreenRoute(
-                onNavigateToHome = { navController.navigate("home") },
-                onNavigateToRegister = { navController.navigate("register") },
+                onNavigateToHome = { navController.navigate(Home) },
+                onNavigateToRegister = { navController.navigate(Register) },
                 snackbarHostState = SnackbarHostState()
             )
         }
 
-        composable("register") {
+        composable<Register> {
             RegisterScreenRoute(
                 onBackPress = { navController.navigateUp() },
                 onNavigateBackToLogin = { navController.navigateUp() },
@@ -33,8 +36,30 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             )
         }
 
-        composable("home") {
-            HomeScreenRoute(onNavigateToBookDetails = {})
+        composable<Home> {
+            HomeScreenRoute(
+                onNavigateToBookDetails = { bookId ->
+                    navController.navigate(BookDetails(bookId = bookId))
+                }
+            )
+        }
+
+        composable<BookDetails> {
+            val args = it.toRoute<BookDetails>()
+
+            BookDetailsRoute()
+        }
+
+        composable<BookShelf> {
+
+        }
+
+        composable<Search> {
+
+        }
+
+        composable<Profile> {
+
         }
     }
 }

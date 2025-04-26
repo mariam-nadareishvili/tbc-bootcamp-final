@@ -1,4 +1,4 @@
-package com.example.android_bootcamp.presentation.model
+package com.example.android_bootcamp.presentation.screen.home
 
 data class FeedBookUi(
     val id: String,
