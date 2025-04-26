@@ -24,6 +24,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,16 +37,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.example.android_bootcamp.R
+import com.example.android_bootcamp.presentation.screen.details.BookDetailsViewModel.BookDetailsUiEvent
+import com.example.android_bootcamp.presentation.screen.home.BookItem
 import com.example.android_bootcamp.presentation.screen.home.RatingBar
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun BookDetailsRoute() {
-    BookDetailsScreen()
+fun BookDetailsRoute(
+    id: String,
+    viewModel: BookDetailsViewModel = hiltViewModel(),
+    onNavigateToReadScreen: (String) -> Unit,
+    onNavigateToBookDetails: (String) -> Unit
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.getBookDetails(id = id)
+
+        viewModel.uiEvents.collectLatest {
+            when (it) {
+                is BookDetailsUiEvent.NavigateToBookDetails -> onNavigateToBookDetails(it.id)
+
+                is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(it.url)
+
+                is BookDetailsUiEvent.ShowError -> {}
+            }
+        }
+
+    }
+    BookDetailsScreen(
+        state = state,
+        onNavigateToReadScreen = viewModel::navigateToReadScreen
+    )
 }
 
 @Composable
-fun BookDetailsScreen() {
+fun BookDetailsScreen(
+    state: BookDetailsUiState,
+    onNavigateToReadScreen: (String?) -> Unit
+) {
     Box {
         Column(
             modifier = Modifier
@@ -60,8 +95,8 @@ fun BookDetailsScreen() {
             )
             Spacer(modifier = Modifier.height(20.dp))
 
-            Image(
-                painter = painterResource(R.drawable.background_gradient),
+            AsyncImage(
+                model = state.bookDetails?.imageUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
@@ -74,37 +109,42 @@ fun BookDetailsScreen() {
             )
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
-                text = "Title",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
+            state.bookDetails?.let {
+                Text(
+                    text = it.author,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = "Title",
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
+            state.bookDetails?.let {
+                Text(
+                    text = it.title,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
             Spacer(modifier = Modifier.height(10.dp))
-            RatingBar(
-                3.5,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                starSize = 24.dp
-            )
-
+            state.bookDetails?.let {
+                RatingBar(
+                    rating = state.bookDetails.rating,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    starSize = 24.dp
+                )
+            }
             Spacer(modifier = Modifier.height(24.dp))
-            val genres =
-                listOf("History", "Fantasy", "Science")
             LazyRow(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
             ) {
-                items(genres) {
-                    ItemGenres(genre = it)
-                    Spacer(modifier = Modifier.width(8.dp)) // spacing between chips
+                state.bookDetails?.let {
+                    items(it.genres) { genre ->
+                        ItemGenres(genre = genre.name)
+                        Spacer(modifier = Modifier.width(8.dp)) // spacing between chips
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -117,12 +157,14 @@ fun BookDetailsScreen() {
                     .padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Information about book's author",
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-            )
+            state.bookDetails?.let {
+                Text(
+                    text = it.aboutAuthor,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                )
+            }
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Introduction",
@@ -133,12 +175,14 @@ fun BookDetailsScreen() {
                     .padding(horizontal = 20.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Information about book",
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-            )
+            state.bookDetails?.let {
+                Text(
+                    text = it.aboutBook,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                )
+            }
 
             Review()
 
@@ -173,14 +217,20 @@ fun BookDetailsScreen() {
                 modifier = Modifier
                     .padding(horizontal = 20.dp, vertical = 20.dp)
             ) {
-//                items(books) {
-//                    BookItem(title = it.first, author = it.second, ratingVisible = false, price =)
-//                }
+                state.similarBooks?.let {
+                    items(it) { book ->
+                        BookItem(
+                            imageUrl = book.imageUrl,
+                            title = book.title,
+                            ratingAndPriceVisible = false
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(60.dp))
         }
         Button(
-            onClick = {},
+            onClick = { onNavigateToReadScreen(state.bookDetails?.source) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
@@ -298,5 +348,5 @@ fun CommentItem(name: String, rate: Double, comment: String) {
 @Preview(showBackground = true)
 @Composable
 fun BookDetailsPreview() {
-    BookDetailsScreen()
+    BookDetailsScreen(state = BookDetailsUiState(), onNavigateToReadScreen = {})
 }

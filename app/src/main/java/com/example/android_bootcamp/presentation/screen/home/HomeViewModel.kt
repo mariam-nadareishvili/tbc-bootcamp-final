@@ -88,4 +88,10 @@ class HomeViewModel @Inject constructor(
             _homeUiEvents.emit(HomeUiEvents.NavigateToBookDetails(id = bookId))
         }
     }
+
+
+    sealed class HomeUiEvents {
+        data class ShowError(val message: String) : HomeUiEvents()
+        data class NavigateToBookDetails(val id :String) : HomeUiEvents()
+    }
 }

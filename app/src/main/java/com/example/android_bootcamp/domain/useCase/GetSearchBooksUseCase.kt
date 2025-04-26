@@ -6,7 +6,7 @@ import com.example.android_bootcamp.domain.repository.BookRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetSearchBooks @Inject constructor(
+class GetSearchBooksUseCase @Inject constructor(
     private val bookRepository: BookRepository
 ) {
     operator fun invoke(searchQuery: String): Flow<Resource<List<Book>>> {

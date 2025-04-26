@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.android_bootcamp.presentation.screen.home.HomeViewModel.HomeUiEvents
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -136,7 +137,10 @@ fun HomeScreen(
                         modifier = Modifier
                             .width(60.dp)
                             .clickable { onNavigateToBookDetails(it.id) },
-                        uiState = it
+                        imageUrl = it.imageUrl,
+                        title = it.title,
+                        rating = it.rating,
+                        averagePrice = it.averagePrice,
                     )
                 }
             }
@@ -172,18 +176,20 @@ fun StoryItem(story: StoryUi, modifier: Modifier = Modifier) {
 
 @Composable
 fun BookItem(
-    uiState: FeedBookUi,
+    imageUrl: String,
+    title: String,
     modifier: Modifier = Modifier,
-    ratingVisible: Boolean = true,
+    rating: Double? = null,
+    averagePrice: Double? = null,
+    ratingAndPriceVisible: Boolean = true,
     starSize: Dp = 14.dp,
     showRatingNumber: Boolean = false,
-    author: String? = null
 ) {
     Column(
         modifier = modifier.padding(horizontal = 20.dp, vertical = 10.dp),
     ) {
         AsyncImage(
-            model = uiState.imageUrl,
+            model = imageUrl,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -193,7 +199,7 @@ fun BookItem(
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = uiState.title,
+            text = title,
             fontSize = 18.sp,
             fontWeight = Bold,
             modifier = Modifier
@@ -201,25 +207,30 @@ fun BookItem(
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
-        if (ratingVisible) {
+        if (ratingAndPriceVisible) {
             Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RatingBar(
-                    rating = uiState.rating,
-                    showRatingNumber = showRatingNumber,
+                rating?.let {
+                    RatingBar(
+                        rating = it,
+                        showRatingNumber = showRatingNumber,
 
-                    starSize = starSize
-                )
-                Text(
-                    text = "$${uiState.averagePrice}",
-                    fontSize = 16.sp,
-                    fontWeight = Bold,
-                    modifier = Modifier.padding(end = 5.dp)
-                )
+                        starSize = starSize
+                    )
+                }
+
+                averagePrice?.let {
+                    Text(
+                        text = "$$averagePrice",
+                        fontSize = 16.sp,
+                        fontWeight = Bold,
+                        modifier = Modifier.padding(end = 5.dp)
+                    )
+                }
             }
         }
     }

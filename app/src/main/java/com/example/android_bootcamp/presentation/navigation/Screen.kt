@@ -23,4 +23,8 @@ sealed class Screen {
 
     @Serializable
     data class BookDetails(val bookId: String)
+
+    @Serializable
+    data class ReadBook(val url: String)
+
 }

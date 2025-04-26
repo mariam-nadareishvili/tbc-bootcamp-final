@@ -1,62 +1,83 @@
-//package com.example.android_bootcamp.presentation.screen.details
-//
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
-//import com.example.android_bootcamp.common.Resource
-//import com.example.android_bootcamp.domain.repository.BookRepository
-//import com.example.android_bootcamp.presentation.mapper.toPresentation
-//import com.example.android_bootcamp.presentation.screen.search.BookUi
-//import dagger.hilt.android.lifecycle.HiltViewModel
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.flow.MutableStateFlow
-//import kotlinx.coroutines.flow.StateFlow
-//import kotlinx.coroutines.flow.collectLatest
-//import kotlinx.coroutines.launch
-//import javax.inject.Inject
-//
-//@HiltViewModel
-//class BookDetailsViewModel @Inject constructor(
-//    private val bookRepository: BookRepository
-//) : ViewModel() {
-//
-//    private val _bookDetailsState =
-//        MutableStateFlow<Resource<BookUi>>(Resource.Success(null))
-//    val bookDetailsState: StateFlow<Resource<BookUi>> = _bookDetailsState
-//
-//    private val _similarBooksState =
-//        MutableStateFlow<Resource<List<BookUi>>>(Resource.Success(null))
-//    val similarBooksState: StateFlow<Resource<List<BookUi>>> = _similarBooksState
-//
-//    fun getBookDetails(id: String) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            bookRepository.getBookById(id).collectLatest {
-//                _bookDetailsState.value = when (it) {
-//                    is Resource.Loading -> Resource.Loading
-//                    is Resource.Success -> {
-//                        val bookUi = it.data?.toPresentation()
-//
-//                        bookUi?.let {
-//                            getSimilarBooks(bookUi.genres.first().name)
-//                        }
-//
-//                        Resource.Success(bookUi)
-//                    }
-//
-//                    is Resource.Error -> Resource.Error(it.message)
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun getSimilarBooks(genre: String) {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            bookRepository.searchBooks(genre).collectLatest {
-//                _similarBooksState.value = when (it) {
-//                    is Resource.Loading -> Resource.Loading
-//                    is Resource.Success -> Resource.Success(it.data?.map { it.toPresentation() })
-//                    is Resource.Error -> Resource.Error(it.message)
-//                }
-//            }
-//        }
-//    }
-//}
+package com.example.android_bootcamp.presentation.screen.details
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.android_bootcamp.common.Resource
+import com.example.android_bootcamp.domain.useCase.GetBookByIdUseCase
+import com.example.android_bootcamp.domain.useCase.GetSearchBooksUseCase
+import com.example.android_bootcamp.presentation.mapper.toPresentation
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class BookDetailsViewModel @Inject constructor(
+    private val getBookByIdUseCase: GetBookByIdUseCase,
+    private val searchBooksUseCase: GetSearchBooksUseCase
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(BookDetailsUiState())
+    val state get() = _state.asStateFlow()
+
+
+    private val _uiEvents = MutableSharedFlow<BookDetailsUiEvent>()
+    val uiEvents: SharedFlow<BookDetailsUiEvent> = _uiEvents
+
+    fun getBookDetails(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getBookByIdUseCase(id).collectLatest { result ->
+                when (result) {
+                    is Resource.Loading -> _state.update {
+                        it.copy(isLoading = result.isLoading)
+                    }
+
+                    is Resource.Success -> {
+                        val bookUi = result.data?.toPresentation()
+
+                        _state.update {
+                            it.copy(bookDetails = bookUi)
+                        }
+                        bookUi?.let {
+                            getSimilarBooks(bookUi.genres.first().name)
+                        }
+                    }
+
+                    is Resource.Error -> _uiEvents.emit(BookDetailsUiEvent.ShowError(message = result.message))
+                }
+            }
+        }
+    }
+
+    private fun getSimilarBooks(genre: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            searchBooksUseCase(searchQuery = genre).collectLatest { result ->
+                when (result) {
+                    is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
+                    is Resource.Success -> _state.update { it.copy(similarBooks = result.data?.map { it.toPresentation() }) }
+                    is Resource.Error -> _uiEvents.emit(BookDetailsUiEvent.ShowError(message = result.message))
+                }
+            }
+        }
+    }
+
+    fun navigateToReadScreen(url:String?){
+        url?.let {
+            viewModelScope.launch {
+                _uiEvents.emit(BookDetailsUiEvent.NavigateToReadScreen(url = url))
+            }
+        }
+    }
+
+    sealed class BookDetailsUiEvent {
+        data class ShowError(val message: String) : BookDetailsUiEvent()
+        data class NavigateToBookDetails(val id: String) : BookDetailsUiEvent()
+        data class NavigateToReadScreen(val url:String) : BookDetailsUiEvent()
+    }
+}

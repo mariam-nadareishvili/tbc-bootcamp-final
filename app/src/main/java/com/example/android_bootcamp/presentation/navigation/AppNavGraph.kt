@@ -47,7 +47,17 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         composable<BookDetails> {
             val args = it.toRoute<BookDetails>()
 
-            BookDetailsRoute()
+            BookDetailsRoute(
+                id = args.bookId,
+                onNavigateToReadScreen = { url ->
+                    navController.navigate(ReadBook(url = url))
+                },
+                onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) },
+            )
+        }
+        composable<ReadBook> {
+            val args = it.toRoute<ReadBook>()
+
         }
 
         composable<BookShelf> {
