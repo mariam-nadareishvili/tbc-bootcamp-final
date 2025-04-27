@@ -1,28 +1,39 @@
-//package com.example.android_bootcamp.presentation.screen.profile
-//
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
-//import com.example.android_bootcamp.common.Resource
-//import com.example.android_bootcamp.presentation.mapper.toPresentation
-//import dagger.hilt.android.lifecycle.HiltViewModel
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.flow.MutableStateFlow
-//import kotlinx.coroutines.flow.StateFlow
-//import kotlinx.coroutines.launch
-//import javax.inject.Inject
-//
-//@HiltViewModel
-//class ProfileViewModel @Inject constructor(
-//    private val authRepository: AuthRepository,
-//    private val cacheRepository: CacheRepository,
-//) : ViewModel() {
-//
-//    private val _userData = MutableStateFlow<Resource<UserUi>>(Resource.Success(null))
-//    val userData: StateFlow<Resource<UserUi>> = _userData
-//
-//    val language = cacheRepository.getAppLanguage()
-//
-//    fun fetchUserData() {
+package com.example.android_bootcamp.presentation.screen.profile
+
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.android_bootcamp.domain.useCase.ClearPreferencesUseCase
+import com.example.android_bootcamp.domain.useCase.GetAppLanguageUseCase
+import com.example.android_bootcamp.domain.useCase.GetDarkModeUseCase
+import com.example.android_bootcamp.domain.useCase.SetDarkModeUseCase
+import com.example.android_bootcamp.domain.useCase.UpdateLanguageUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    private val updateLanguageUseCase: UpdateLanguageUseCase,
+    private val getAppLanguageUseCase: GetAppLanguageUseCase,
+    private val clearPreferencesUseCase: ClearPreferencesUseCase,
+    private val getDarkModeUseCase: GetDarkModeUseCase,
+    private val setDarkModeUseCase: SetDarkModeUseCase
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(ProfileUiState())
+    val state get() = _state.asStateFlow()
+
+    private val _event = MutableSharedFlow<ProfileUiEvents>()
+    val events: SharedFlow<ProfileUiEvents> = _event
+
+    //    fun fetchUserData() {
 //        viewModelScope.launch {
 //            _userData.value = Resource.Loading
 //
@@ -40,16 +51,56 @@
 //            }
 //        }
 //    }
-//
-//    fun updateLanguage(language: String) {
-//        viewModelScope.launch {
-//            cacheRepository.updateLanguage(language)
-//        }
-//    }
-//
-//    fun clear() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            cacheRepository.clearPreferences()
-//        }
-//    }
-//}
+    init {
+        getCurrentTheme()
+    }
+    // Get the current dark mode preference
+
+    private fun getCurrentTheme() {
+        viewModelScope.launch {
+            getDarkModeUseCase().collect { isDarkMode ->
+                _state.update { it.copy(isDarkMode = isDarkMode) }
+            }
+        }
+    }
+
+    // Update the dark mode preference when the switch is toggled
+
+    fun onToggleTheme(isDarkMode: Boolean) {
+        viewModelScope.launch {
+            setDarkModeUseCase(isDarkMode)
+            // Update UI state to reflect the new dark mode setting
+            _state.update { it.copy(isDarkMode = isDarkMode) }
+
+            // Change the theme globally
+            if (isDarkMode) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
+    }
+
+    fun updateLanguage(language: String) {
+        viewModelScope.launch {
+            updateLanguageUseCase(language)
+        }
+    }
+
+    fun clear() {
+        viewModelScope.launch(Dispatchers.IO) {
+            clearPreferencesUseCase
+        }
+    }
+
+    fun navigateToLogin() {
+        viewModelScope.launch {
+            _event.emit(ProfileUiEvents.NavigateToLogin)
+        }
+    }
+
+
+    sealed class ProfileUiEvents {
+        data object NavigateToLogin : ProfileUiEvents()
+    }
+}
