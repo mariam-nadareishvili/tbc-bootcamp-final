@@ -209,11 +209,10 @@ fun BookDetailsScreen(
                     color = Color.Gray
                 )
                 Text(
-                    text = "title",
+                    text = "Book reminds me",
                     modifier = Modifier.padding(horizontal = 8.dp),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black // or colorResource(R.color.title_color)
                 )
                 HorizontalDivider(
                     modifier = Modifier
@@ -275,7 +274,7 @@ fun BookDetailsScreen(
 }
 
 @Composable
-fun ItemGenres(genre: String, selected: Boolean = false, modifier: Modifier = Modifier) {
+fun ItemGenres(genre: String, modifier: Modifier = Modifier, selected: Boolean = false) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))

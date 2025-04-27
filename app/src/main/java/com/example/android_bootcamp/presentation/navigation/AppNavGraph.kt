@@ -160,7 +160,6 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             composable<BookShelfScreen> { }
             composable<SearchScreen> {
                 SearchScreenRoute(
-                    onBackPress = { navController.navigateUp() },
                     onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) }
                 )
             }

@@ -24,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SearchScreenRoute(
     viewModel: SearchViewModel = hiltViewModel(),
-    onBackPress: () -> Unit,
     onNavigateToBookDetails: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -49,14 +47,12 @@ fun SearchScreenRoute(
                     event.id
                 )
 
-                is SearchViewModel.SearchUiEvent.OnBackPress -> onBackPress()
                 is SearchViewModel.SearchUiEvent.ShowError -> {}
             }
         }
     }
     SearchScreen(
         state = state,
-        onBackPress = viewModel::navigateWithBackIcon,
         onNavigateToBookDetails = viewModel::navigateToBookDetails,
         onSearchQueryChange = viewModel::search,
         onSelectGenre = viewModel::searchByGenre
@@ -66,7 +62,6 @@ fun SearchScreenRoute(
 @Composable
 fun SearchScreen(
     state: SearchUiState,
-    onBackPress: () -> Unit,
     onNavigateToBookDetails: (String) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onSelectGenre: (String) -> Unit
@@ -75,15 +70,7 @@ fun SearchScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_back),
-            contentDescription = null,
-            modifier = Modifier
-                .padding(20.dp)
-                .clickable { onBackPress() },
-            tint = colorResource(R.color.sky_blue)
-        )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(36.dp))
         TextField(
             value = state.searchQuery,
             onValueChange = { newValue -> onSearchQueryChange(newValue) },
@@ -127,6 +114,8 @@ fun SearchScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2)
         ) {
@@ -151,7 +140,6 @@ fun SearchScreen(
 fun SearchScreenPreview() {
     SearchScreen(
         state = SearchUiState(),
-        onBackPress = {},
         onNavigateToBookDetails = {},
         onSearchQueryChange = {},
         onSelectGenre = {}

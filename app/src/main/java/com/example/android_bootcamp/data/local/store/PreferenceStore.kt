@@ -21,11 +21,17 @@ class PreferenceStore @Inject constructor(@ApplicationContext private val contex
     companion object {
         private val REMEMBER_ME_KEY = booleanPreferencesKey("remember_me")
         private val LANGUAGE_KEY = stringPreferencesKey("language")
+        private val THEME_KEY = booleanPreferencesKey("theme")
     }
 
     val language: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[LANGUAGE_KEY] ?: "en"
+        }
+
+    val isDarkMode: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[THEME_KEY] ?: false // Default to light mode
         }
 
     suspend fun saveLanguage(language: String) {
@@ -49,6 +55,12 @@ class PreferenceStore @Inject constructor(@ApplicationContext private val contex
     suspend fun clearRememberMe() {
         context.dataStore.edit { preferences ->
             preferences.remove(REMEMBER_ME_KEY)
+        }
+    }
+
+    suspend fun saveDarkMode(isDarkMode: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[THEME_KEY] = isDarkMode
         }
     }
 }

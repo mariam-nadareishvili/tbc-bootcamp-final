@@ -1,30 +1,28 @@
-package com.example.android_bootcamp.presentation.navigation
-
 import kotlinx.serialization.Serializable
 
-sealed class Screen {
-    @Serializable
-    object Login
 
-    @Serializable
-    object Register
+sealed interface Screen
 
-    @Serializable
-    object Home
+@Serializable
+object Login : Screen
 
-    @Serializable
-    object BookShelf
+@Serializable
+object Register : Screen
 
-    @Serializable
-    object Search
+@Serializable
+object HomeScreen : Screen
 
-    @Serializable
-    object Profile
+@Serializable
+object BookShelfScreen : Screen
 
-    @Serializable
-    data class BookDetails(val bookId: String)
+@Serializable
+data object SearchScreen : Screen
 
-    @Serializable
-    data class Read(val url: String)
+@Serializable
+data object ProfileScreen : Screen
 
-}
+@Serializable
+data class BookDetails(val bookId: String) : Screen
+
+@Serializable
+data class Read(val url: String) : Screen

@@ -109,4 +109,6 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.navigation.compose.v284)
+    implementation(libs.androidx.material)
+    implementation(libs.accompanist.systemuicontroller)
 }

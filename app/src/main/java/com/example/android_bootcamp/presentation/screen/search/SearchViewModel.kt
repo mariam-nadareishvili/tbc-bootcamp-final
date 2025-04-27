@@ -120,13 +120,6 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun navigateWithBackIcon() {
-        viewModelScope.launch {
-            _uiEvents.emit(SearchUiEvent.OnBackPress)
-        }
-    }
-
-
     fun navigateToBookDetails(id: String) {
         viewModelScope.launch {
             _uiEvents.emit(SearchUiEvent.NavigateToBookDetail(id = id))
@@ -137,6 +130,5 @@ class SearchViewModel @Inject constructor(
     sealed class SearchUiEvent {
         data class NavigateToBookDetail(val id: String) : SearchUiEvent()
         data class ShowError(val message: String) : SearchUiEvent()
-        data object OnBackPress : SearchUiEvent()
     }
 }

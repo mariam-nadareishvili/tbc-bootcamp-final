@@ -24,4 +24,11 @@ class CacheRepositoryImpl @Inject constructor(
     override suspend fun updateLanguage(language: String) {
         preferenceStore.saveLanguage(language)
     }
+    override fun isDarkMode(): Flow<Boolean> {
+        return preferenceStore.isDarkMode
+    }
+
+    override suspend fun setDarkMode(isDarkMode: Boolean) {
+        preferenceStore.saveDarkMode(isDarkMode)
+    }
 }
