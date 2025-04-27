@@ -6,7 +6,6 @@ import com.example.android_bootcamp.domain.useCase.GetDarkModeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,7 +19,9 @@ class BookViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _isDarkModeEnabled.value = getDarkModeUseCase().first()
+            getDarkModeUseCase().collect { isDarkMode ->
+                _isDarkModeEnabled.value = isDarkMode
+            }
         }
     }
 }
