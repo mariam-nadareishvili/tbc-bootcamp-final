@@ -107,4 +107,6 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
+
+    implementation(libs.androidx.navigation.compose.v284)
 }

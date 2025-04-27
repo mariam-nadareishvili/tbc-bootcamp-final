@@ -14,6 +14,6 @@ fun BookDto.toDomain(): Book {
         author = author,
         aboutAuthor = aboutAuthor,
         genres = genres,
-        source = null
+        source = source
     )
 }

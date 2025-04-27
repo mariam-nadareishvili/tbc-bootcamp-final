@@ -6,6 +6,7 @@ import com.example.android_bootcamp.common.Resource
 import com.example.android_bootcamp.domain.useCase.GetBookByIdUseCase
 import com.example.android_bootcamp.domain.useCase.GetSearchBooksUseCase
 import com.example.android_bootcamp.presentation.mapper.toPresentation
+import com.example.android_bootcamp.presentation.screen.register.RegisterUiEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,6 +45,7 @@ class BookDetailsViewModel @Inject constructor(
                         _state.update {
                             it.copy(bookDetails = bookUi)
                         }
+
                         bookUi?.let {
                             getSimilarBooks(bookUi.genres.first().name)
                         }
@@ -67,7 +69,7 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
-    fun navigateToReadScreen(url:String?){
+    fun navigateToReadScreen(url: String?) {
         url?.let {
             viewModelScope.launch {
                 _uiEvents.emit(BookDetailsUiEvent.NavigateToReadScreen(url = url))
@@ -75,9 +77,22 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
+    fun navigateWithBackIcon() {
+        viewModelScope.launch {
+            _uiEvents.emit(BookDetailsUiEvent.OnBackPress)
+        }
+    }
+
+    fun navigateToBookDetails(id: String) {
+        viewModelScope.launch {
+            _uiEvents.emit(BookDetailsUiEvent.NavigateToBookDetails(id = id))
+        }
+    }
+
     sealed class BookDetailsUiEvent {
         data class ShowError(val message: String) : BookDetailsUiEvent()
         data class NavigateToBookDetails(val id: String) : BookDetailsUiEvent()
-        data class NavigateToReadScreen(val url:String) : BookDetailsUiEvent()
+        data class NavigateToReadScreen(val url: String) : BookDetailsUiEvent()
+        data object OnBackPress : BookDetailsUiEvent()
     }
 }

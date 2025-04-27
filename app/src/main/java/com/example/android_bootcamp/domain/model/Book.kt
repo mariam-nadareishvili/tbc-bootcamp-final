@@ -1,7 +1,5 @@
 package com.example.android_bootcamp.domain.model
 
-import kotlinx.serialization.SerialName
-
 data class Book(
     val id: String,
     val imageUrl: String,

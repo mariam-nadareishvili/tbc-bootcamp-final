@@ -6,5 +6,4 @@ data class BookDetailsUiState(
     val isLoading: Boolean = false,
     val bookDetails: BookUi? = null,
     val similarBooks: List<BookUi>? = emptyList()
-
 )

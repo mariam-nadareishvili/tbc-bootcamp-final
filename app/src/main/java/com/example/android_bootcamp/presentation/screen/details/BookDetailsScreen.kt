@@ -3,6 +3,7 @@ package com.example.android_bootcamp.presentation.screen.details
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,6 +50,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun BookDetailsRoute(
     id: String,
+    onBackPress: () -> Unit,
     viewModel: BookDetailsViewModel = hiltViewModel(),
     onNavigateToReadScreen: (String) -> Unit,
     onNavigateToBookDetails: (String) -> Unit
@@ -65,20 +67,26 @@ fun BookDetailsRoute(
                 is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(it.url)
 
                 is BookDetailsUiEvent.ShowError -> {}
+
+                is BookDetailsUiEvent.OnBackPress -> onBackPress()
             }
         }
 
     }
     BookDetailsScreen(
         state = state,
-        onNavigateToReadScreen = viewModel::navigateToReadScreen
+        onNavigateToReadScreen = viewModel::navigateToReadScreen,
+        onBackPress = viewModel::navigateWithBackIcon,
+        onNavigateToBookDetails = viewModel::navigateToBookDetails
     )
 }
 
 @Composable
 fun BookDetailsScreen(
     state: BookDetailsUiState,
-    onNavigateToReadScreen: (String?) -> Unit
+    onNavigateToReadScreen: (String?) -> Unit,
+    onBackPress: () -> Unit,
+    onNavigateToBookDetails: (String) -> Unit
 ) {
     Box {
         Column(
@@ -90,7 +98,8 @@ fun BookDetailsScreen(
                 painter = painterResource(R.drawable.ic_back),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(20.dp),
+                    .padding(20.dp)
+                    .clickable { onBackPress() },
                 tint = colorResource(R.color.sky_blue)
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -222,48 +231,55 @@ fun BookDetailsScreen(
                         BookItem(
                             imageUrl = book.imageUrl,
                             title = book.title,
-                            ratingAndPriceVisible = false
+                            ratingAndPriceVisible = false,
+                            modifier = Modifier
+                                .clickable { onNavigateToBookDetails(book.id) }
                         )
                     }
                 }
             }
             Spacer(modifier = Modifier.height(60.dp))
         }
-        Button(
-            onClick = { onNavigateToReadScreen(state.bookDetails?.source) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(70.dp)
-                .align(Alignment.BottomCenter),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(R.color.sky_blue)
-            )
-        ) {
-            Box(
+
+        if (state.bookDetails?.source != null) {
+            Button(
+                onClick = {
+                    onNavigateToReadScreen(state.bookDetails.source)
+                },
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .align(Alignment.BottomCenter),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.sky_blue)
+                )
             ) {
-                Text(
-                    text = "Read now",
-                    fontSize = 20.sp,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_read),
-                    contentDescription = null,
-                    modifier = Modifier.align(Alignment.CenterEnd)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Text(
+                        text = "Read now",
+                        fontSize = 20.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_read),
+                        contentDescription = null,
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun ItemGenres(genre: String) {
+fun ItemGenres(genre: String, selected: Boolean = false, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(Color.Gray)
+            .background(if (selected) Color.Black else Color.Gray)
             .padding(horizontal = 16.dp, vertical = 8.dp) // Gives shape and space to text
     ) {
         Text(
@@ -348,5 +364,9 @@ fun CommentItem(name: String, rate: Double, comment: String) {
 @Preview(showBackground = true)
 @Composable
 fun BookDetailsPreview() {
-    BookDetailsScreen(state = BookDetailsUiState(), onNavigateToReadScreen = {})
+    BookDetailsScreen(state = BookDetailsUiState(),
+        onNavigateToReadScreen = {},
+        onBackPress = {},
+        onNavigateToBookDetails = {}
+    )
 }

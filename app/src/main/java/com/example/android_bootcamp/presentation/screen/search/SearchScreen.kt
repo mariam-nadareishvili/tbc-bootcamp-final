@@ -1,43 +1,76 @@
 package com.example.android_bootcamp.presentation.screen.search
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.android_bootcamp.R
 import com.example.android_bootcamp.presentation.screen.details.ItemGenres
 import com.example.android_bootcamp.presentation.screen.home.BookItem
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun SearchScreenRoute() {
+fun SearchScreenRoute(
+    viewModel: SearchViewModel = hiltViewModel(),
+    onBackPress: () -> Unit,
+    onNavigateToBookDetails: (String) -> Unit
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collectLatest { event ->
+            when (event) {
+                is SearchViewModel.SearchUiEvent.NavigateToBookDetail -> onNavigateToBookDetails(
+                    event.id
+                )
+
+                is SearchViewModel.SearchUiEvent.OnBackPress -> onBackPress()
+                is SearchViewModel.SearchUiEvent.ShowError -> {}
+            }
+        }
+    }
+    SearchScreen(
+        state = state,
+        onBackPress = viewModel::navigateWithBackIcon,
+        onNavigateToBookDetails = viewModel::navigateToBookDetails,
+        onSearchQueryChange = viewModel::search,
+        onSelectGenre = viewModel::searchByGenre
+    )
 }
 
 @Composable
-fun SearchScreen() {
+fun SearchScreen(
+    state: SearchUiState,
+    onBackPress: () -> Unit,
+    onNavigateToBookDetails: (String) -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+    onSelectGenre: (String) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,13 +79,14 @@ fun SearchScreen() {
             painter = painterResource(R.drawable.ic_back),
             contentDescription = null,
             modifier = Modifier
-                .padding(20.dp),
+                .padding(20.dp)
+                .clickable { onBackPress() },
             tint = colorResource(R.color.sky_blue)
         )
         Spacer(modifier = Modifier.height(20.dp))
         TextField(
-            value = "",
-            onValueChange = {},
+            value = state.searchQuery,
+            onValueChange = { newValue -> onSearchQueryChange(newValue) },
             placeholder = { Text("Search here...", modifier = Modifier.padding(top = 2.dp)) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,33 +111,37 @@ fun SearchScreen() {
                 )
             }
         )
-        val genres =
-            listOf("History", "Fantasy", "Science", "Romance", "Science", "Science", "Science")
-        LazyRow(
-            modifier = Modifier
-                .padding(horizontal = 30.dp, vertical = 30.dp)
-        ) {
-            items(genres) {
-                ItemGenres(genre = it)
-                Spacer(modifier = Modifier.width(8.dp)) // spacing between chips
+
+        if (state.searchQuery.isBlank()) {
+            LazyRow(
+                modifier = Modifier
+                    .padding(horizontal = 30.dp, vertical = 30.dp)
+            ) {
+                items(state.genres) { genre ->
+                    ItemGenres(
+                        genre = genre.name,
+                        selected = genre.name==state.selectedGenre,
+                        modifier = Modifier.clickable { onSelectGenre(genre.name) })
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
             }
         }
-        val books = listOf(
-            "1984" to "George Orwell",
-            "Brave New World" to "Aldous Huxley",
-            "Fahrenheit 451" to "Ray Bradbury",
-            "The Hobbit" to "J.R.R. Tolkien",
-            "Fahrenheit 451" to "Ray Bradbury",
-            "The Hobbit" to "J.R.R. Tolkien",
-            "Fahrenheit 451" to "Ray Bradbury",
-            "The Hobbit" to "J.R.R. Tolkien"
-        )
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2)
         ) {
-//            items(books) {
-//                BookItem(author = it.first, title = it.second,)
-//            }
+            items(state.searchBook) { book ->
+                BookItem(
+                    imageUrl = book.imageUrl,
+                    title = book.title,
+                    author = book.author,
+                    ratingAndPriceVisible = true,
+                    rating = book.rating,
+                    averagePrice = book.averagePrice,
+                    modifier = Modifier
+                        .clickable { onNavigateToBookDetails(book.id) }
+                )
+            }
         }
     }
 }
@@ -111,5 +149,11 @@ fun SearchScreen() {
 @Preview(showBackground = true)
 @Composable
 fun SearchScreenPreview() {
-    SearchScreen()
+    SearchScreen(
+        state = SearchUiState(),
+        onBackPress = {},
+        onNavigateToBookDetails = {},
+        onSearchQueryChange = {},
+        onSelectGenre = {}
+    )
 }

@@ -184,6 +184,7 @@ fun BookItem(
     ratingAndPriceVisible: Boolean = true,
     starSize: Dp = 14.dp,
     showRatingNumber: Boolean = false,
+    author: String? = null
 ) {
     Column(
         modifier = modifier.padding(horizontal = 20.dp, vertical = 10.dp),
