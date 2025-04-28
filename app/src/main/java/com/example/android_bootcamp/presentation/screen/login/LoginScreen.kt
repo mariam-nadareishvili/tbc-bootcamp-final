@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -117,7 +118,7 @@ fun LoginScreen(
             placeholder = {
                 Text(
                     modifier = Modifier.padding(top = 2.dp),
-                    text = "Email",
+                    text = stringResource(R.string.email),
                     fontFamily = FontFamily.Serif
                 )
             },
@@ -152,7 +153,7 @@ fun LoginScreen(
             onValueChange = { newPassword -> onPasswordChange(newPassword) },
             placeholder = {
                 Text(
-                    text = "Password",
+                    text = stringResource(R.string.password),
                     fontFamily = FontFamily.Serif,
                     modifier = Modifier.padding(top = 2.dp)
                 )
@@ -207,7 +208,7 @@ fun LoginScreen(
                 enabled = true
             )
             Text(
-                text = "Remember me",
+                text = stringResource(R.string.remember_me),
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Serif
             )
@@ -225,7 +226,7 @@ fun LoginScreen(
         )
         {
             Text(
-                text = "Login",
+                text = stringResource(R.string.log_in),
                 fontSize = 20.sp,
                 fontFamily = FontFamily.Serif
             )
@@ -234,12 +235,12 @@ fun LoginScreen(
         Row(verticalAlignment = Alignment.CenterVertically)
         {
             Text(
-                text = "Don't you have an account yet?",
+                text = stringResource(R.string.don_t_you_have_an_account_yet),
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Serif
             )
             Text(
-                text = "Sign up",
+                text = stringResource(R.string.sign_up),
                 fontSize = 18.sp,
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.Bold,

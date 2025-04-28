@@ -82,12 +82,19 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateLanguage(language: String) {
+    fun toggleLanguage() {
+        val newLanguage =
+            if (state.value.currentLanguage == LanguageType.GEORGIAN.language) {
+                LanguageType.ENGLISH.language
+            } else {
+                LanguageType.GEORGIAN.language
+            }
+
         viewModelScope.launch {
-            updateLanguageUseCase(language)
+            updateLanguageUseCase(newLanguage)
 
             _state.update {
-                it.copy(currentLanguage = language)
+                it.copy(currentLanguage = newLanguage)
             }
         }
     }

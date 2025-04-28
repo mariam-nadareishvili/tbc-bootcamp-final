@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -105,13 +106,13 @@ fun RegisterScreen(
         ) {
 
             Text(
-                text = "Register",
+                text = stringResource(R.string.register),
                 fontSize = 30.sp,
                 fontFamily = FontFamily.Serif
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Create your new account",
+                text = stringResource(R.string.create_your_new_account),
                 fontSize = 18.sp,
                 fontFamily = FontFamily.Serif
             )
@@ -121,7 +122,7 @@ fun RegisterScreen(
                 onValueChange = { newFullName -> onFullNameChange(newFullName) },
                 placeholder = {
                     Text(
-                        "Full name",
+                        stringResource(R.string.full_name),
                         fontFamily = FontFamily.Serif,
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -159,7 +160,7 @@ fun RegisterScreen(
                 onValueChange = { newEmail -> onEmailChange(newEmail) },
                 placeholder = {
                     Text(
-                        "Email",
+                        stringResource(R.string.email),
                         fontFamily = FontFamily.Serif,
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -197,7 +198,7 @@ fun RegisterScreen(
                 onValueChange = { newPassword -> onPasswordChange(newPassword) },
                 placeholder = {
                     Text(
-                        "Password",
+                        stringResource(R.string.password),
                         fontFamily = FontFamily.Serif,
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -246,7 +247,7 @@ fun RegisterScreen(
                 onValueChange = { newRepeatedPassword -> onRepeatPasswordChange(newRepeatedPassword) },
                 placeholder = {
                     Text(
-                        "Confirm Password",
+                        stringResource(R.string.confirm_password),
                         fontFamily = FontFamily.Serif,
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -300,7 +301,7 @@ fun RegisterScreen(
                 )
             ) {
                 Text(
-                    text = "Sign Up",
+                    text = stringResource(R.string.sign_up),
                     fontSize = 20.sp,
                     fontFamily = FontFamily.Serif
                 )

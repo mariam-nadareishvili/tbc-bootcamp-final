@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Android-Bootcamp</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="invalid_email_format">Invalid email format</string>
     <string name="incorrect_password">Password must be at least 6 characters and contain letters and numbers</string>
     <string name="close">Close</string>
@@ -11,7 +10,6 @@
     <string name="introduction">Introduction</string>
     <string name="this_book_remainds_me_of">This book remainds me of</string>
     <string name="read_now">Read now</string>
-    <string name="hello_book_lover">Hello book lover! 📚</string>
     <string name="enter_email">Enter email</string>
     <string name="enter_password">Enter password</string>
     <string name="remember_me">Remember me</string>
@@ -20,11 +18,9 @@
     <string name="sign_up_here">Sign up here</string>
     <string name="sign_out">Sign Out</string>
     <string name="account">Account</string>
-    <string name="change_language">Change Language</string>
     <string name="sign_up">Sign Up</string>
     <string name="firstname">Firstname</string>
     <string name="lastname">Lastname</string>
-    <string name="date_of_birth">Date of birth</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="repeat_password">Repeat password</string>
@@ -42,4 +38,24 @@
     <string name="password_must_be_at_least_6_characters_and_contain_letters_and_numbers">Password must be at least 6 characters and contain letters and numbers</string>
     <string name="passwords_do_not_match">Passwords do not match</string>
     <string name="please_select_your_date_of_birth">Please select your date of birth</string>
+    <string name="number_of_reads">Read</string>
+    <string name="number_of_votes">Votes</string>
+    <string name="pages">Pages</string>
+    <string name="button_start_reading">Start reading</string>
+    <string name="introduction_of_book">Introduction</string>
+    <string name="information_about_author">About author</string>
+    <string name="similar_books_title">Book reminds me of</string>
+    <string name="reviews">Reviews</string>
+    <string name="show_less_information">Show Less ▲</string>
+    <string name="view_all_reviews">View All Reviews ▼</string>
+    <string name="read_more">Read More ▼</string>
+    <string name="language">Change language</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="log_out">Log Out</string>
+    <string name="register">Register</string>
+    <string name="create_your_new_account">Create your new account</string>
+    <string name="full_name">Full name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="search_here">Search here…</string>
+    <string name="bookshelf">Bookshelf</string>
 </resources>

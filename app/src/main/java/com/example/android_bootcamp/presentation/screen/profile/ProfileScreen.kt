@@ -1,9 +1,9 @@
 package com.example.android_bootcamp.presentation.screen.profile
 
-import android.content.Context
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,13 +33,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.android_bootcamp.R
+import com.example.android_bootcamp.presentation.screen.bottom_sheet.BottomSheetContent
 
 
 @Composable
 fun ProfileScreenRoute(
     viewmodel: ProfileViewModel = hiltViewModel(),
     onNavigateToLogin: () -> Unit,
-    context: Context = LocalContext.current
+    onOpenBottomSheet: (BottomSheetContent) -> Unit
 ) {
     val state by viewmodel.state.collectAsStateWithLifecycle()
 
@@ -47,9 +48,8 @@ fun ProfileScreenRoute(
         state = state,
         onToggleTheme = viewmodel::onToggleTheme,
         onNavigateToLogin = viewmodel::navigateToLogin,
-        onToggleLanguage = { language ->
-            viewmodel.updateLanguage(language)
-        }
+        onToggleLanguage = viewmodel::toggleLanguage,
+        onOpenBottomSheet = onOpenBottomSheet
     )
 }
 
@@ -58,7 +58,8 @@ fun ProfileScreen(
     state: ProfileUiState,
     onToggleTheme: (Boolean) -> Unit,
     onNavigateToLogin: () -> Unit,
-    onToggleLanguage: (String) -> Unit
+    onToggleLanguage: () -> Unit,
+    onOpenBottomSheet: (BottomSheetContent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -87,67 +88,38 @@ fun ProfileScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(80.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_web),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(start = 20.dp)
-                    .size(30.dp)
-            )
-            Text(
-                text = stringResource(R.string.change_language),
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(end = 110.dp)
-            )
-            Image(
-                painter = painterResource(
-                    if (state.currentLanguage == "ka") R.drawable.geo
-                    else R.drawable.ic_log_out
-                ), contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .size(40.dp)
-                    .clickable {
-                        val newLanguage = if (state.currentLanguage == "ka") "en" else "ka"
-                        onToggleLanguage(newLanguage)
-                    }
-            )
-        }
-        Spacer(modifier = Modifier.height(30.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_dark_mode),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(start = 20.dp)
-                    .size(40.dp)
-            )
-            Text(
-                text = "Dark Mode",
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(end = 100.dp)
-            )
-            Switch(
-                modifier = Modifier
-                    .padding(end = 10.dp),
-                checked = state.isDarkMode,
-                onCheckedChange = { onToggleTheme(it) }
-            )
-        }
+        ProfileSection(
+            leadingIconId = R.drawable.ic_web,
+            textId = R.string.language,
+            trailingContent = {
+                Image(
+                    painter = painterResource(
+                        if (state.currentLanguage == LanguageType.GEORGIAN.language) {
+                            R.drawable.ic_uk
+                        } else {
+                            R.drawable.ic_geo
+                        }
+                    ), contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable {
+                            onToggleLanguage()
+                        }
+                )
+            }
+        )
+        Spacer(modifier = Modifier.height(28.dp))
+        ProfileSection(
+            leadingIconId = R.drawable.ic_dark_mode,
+            textId = R.string.dark_mode,
+            trailingContent = {
+                Switch(
+                    checked = state.isDarkMode,
+                    onCheckedChange = { onToggleTheme(it) }
+                )
+            }
+        )
         Spacer(modifier = Modifier.height(40.dp))
         HorizontalDivider(modifier = Modifier.fillMaxWidth(1f))
         Spacer(modifier = Modifier.height(20.dp))
@@ -166,20 +138,59 @@ fun ProfileScreen(
                 tint = Color.Red
             )
             Text(
-                text = "Log Out",
+                text = stringResource(R.string.log_out),
                 fontSize = 20.sp,
                 color = Color.Red,
                 modifier = Modifier
                     .padding(start = 10.dp)
+                    .clickable {
+                        onOpenBottomSheet(
+                            BottomSheetContent.SelectBookList { selectedList ->
+                                println("selected result: $selectedList")
+                            }
+                        )
+                    }
             )
         }
+    }
+}
+
+@Composable
+fun ProfileSection(
+    @DrawableRes leadingIconId: Int,
+    @StringRes textId: Int,
+    trailingContent: @Composable () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(leadingIconId),
+            contentDescription = null,
+            modifier = Modifier
+                .size(30.dp)
+        )
+        Spacer(modifier = Modifier.width(24.dp))
+        Text(
+            text = stringResource(textId),
+            fontSize = 20.sp
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        trailingContent()
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen(state = ProfileUiState(), onToggleTheme = {}, onNavigateToLogin = {},
-        onToggleLanguage = {}
+    ProfileScreen(
+        state = ProfileUiState(),
+        onToggleTheme = {},
+        onNavigateToLogin = {},
+        onToggleLanguage = {},
+        onOpenBottomSheet = {}
     )
 }

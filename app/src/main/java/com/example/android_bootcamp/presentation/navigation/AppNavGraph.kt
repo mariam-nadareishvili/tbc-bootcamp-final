@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.android_bootcamp.presentation.navigation
 
 import BookDetails
@@ -8,13 +10,15 @@ import ProfileScreen
 import Read
 import Register
 import SearchScreen
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -33,17 +37,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.android_bootcamp.data.local.store.PreferenceStore
-import com.example.android_bootcamp.domain.useCase.ClearPreferencesUseCase
-import com.example.android_bootcamp.domain.useCase.GetAppLanguageUseCase
-import com.example.android_bootcamp.domain.useCase.GetDarkModeUseCase
-import com.example.android_bootcamp.domain.useCase.SetDarkModeUseCase
-import com.example.android_bootcamp.domain.useCase.UpdateLanguageUseCase
+import com.example.android_bootcamp.presentation.screen.bottom_sheet.BottomSheetHost
+import com.example.android_bootcamp.presentation.screen.bottom_sheet.rememberBottomSheetController
 import com.example.android_bootcamp.presentation.screen.details.BookDetailsRoute
 import com.example.android_bootcamp.presentation.screen.home.HomeScreenRoute
 import com.example.android_bootcamp.presentation.screen.login.LoginScreenRoute
 import com.example.android_bootcamp.presentation.screen.profile.ProfileScreenRoute
-import com.example.android_bootcamp.presentation.screen.profile.ProfileViewModel
 import com.example.android_bootcamp.presentation.screen.read.ReadScreen
 import com.example.android_bootcamp.presentation.screen.register.RegisterScreenRoute
 import com.example.android_bootcamp.presentation.screen.search.SearchScreenRoute
@@ -68,6 +67,8 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
 
         else -> false
     }
+
+    val bottomSheetController = rememberBottomSheetController()
 
     val snackbarHostState = remember { SnackbarHostState() } // ✅ create only ONCE
 
@@ -101,13 +102,13 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                                         contentDescription = null
                                     )
 
-                                    is BottomNavItem.Profile -> Icon(
-                                        Icons.Default.Person,
+                                    is BottomNavItem.BookShelf -> Icon(
+                                        Icons.AutoMirrored.Filled.MenuBook,
                                         contentDescription = null
                                     )
 
-                                    is BottomNavItem.BookShelf -> Icon(
-                                        Icons.Default.Book,
+                                    is BottomNavItem.Profile -> Icon(
+                                        Icons.Default.Person,
                                         contentDescription = null
                                     )
                                 }
@@ -118,65 +119,72 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
             }
         }
     ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = HomeScreen,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable<Login> {
-                LoginScreenRoute(
-                    onNavigateToHome = { navController.navigate(HomeScreen) },
-                    onNavigateToRegister = { navController.navigate(Register) },
-                    snackbarHostState = snackbarHostState // ✅ pass the SAME
-                )
+        Box(modifier = Modifier.padding(paddingValues)) {
+            NavHost(
+                navController = navController,
+                startDestination = HomeScreen,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable<Login> {
+                    LoginScreenRoute(
+                        onNavigateToHome = { navController.navigate(HomeScreen) },
+                        onNavigateToRegister = { navController.navigate(Register) },
+                        snackbarHostState = snackbarHostState // ✅ pass the SAME
+                    )
+                }
+
+                composable<Register> {
+                    RegisterScreenRoute(
+                        onBackPress = { navController.navigateUp() },
+                        onNavigateBackToLogin = { navController.navigateUp() },
+                        snackbarHostState = snackbarHostState // ✅ pass the SAME
+                    )
+                }
+
+                composable<HomeScreen> {
+                    HomeScreenRoute(
+                        onNavigateToBookDetails = { bookId ->
+                            navController.navigate(BookDetails(bookId = bookId))
+                        }
+                    )
+                }
+
+                composable<BookDetails> {
+                    val args = it.toRoute<BookDetails>()
+
+                    BookDetailsRoute(
+                        id = args.bookId,
+                        onNavigateToReadScreen = { url ->
+                            navController.navigate(Read(url = url))
+                        },
+                        onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) },
+                        onBackPress = { navController.navigateUp() }
+                    )
+                }
+
+                composable<Read> {
+                    val args = it.toRoute<Read>()
+
+                    ReadScreen(url = args.url)
+                }
+
+                composable<BookShelfScreen> { }
+                composable<SearchScreen> {
+                    SearchScreenRoute(
+                        onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) }
+                    )
+                }
+                composable<ProfileScreen> {
+                    ProfileScreenRoute(
+                        onNavigateToLogin = {},
+                        onOpenBottomSheet = { sheetContent ->
+                            bottomSheetController.openBottomSheet(sheetContent)
+                        }
+                    )
+                }
             }
 
-            composable<Register> {
-                RegisterScreenRoute(
-                    onBackPress = { navController.navigateUp() },
-                    onNavigateBackToLogin = { navController.navigateUp() },
-                    snackbarHostState = snackbarHostState // ✅ pass the SAME
-                )
-            }
-
-            composable<HomeScreen> {
-                HomeScreenRoute(
-                    onNavigateToBookDetails = { bookId ->
-                        navController.navigate(BookDetails(bookId = bookId))
-                    }
-                )
-            }
-
-            composable<BookDetails> {
-                val args = it.toRoute<BookDetails>()
-
-                BookDetailsRoute(
-                    id = args.bookId,
-                    onNavigateToReadScreen = { url ->
-                        navController.navigate(Read(url = url))
-                    },
-                    onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) },
-                    onBackPress = { navController.navigateUp() }
-                )
-            }
-
-            composable<Read> {
-                val args = it.toRoute<Read>()
-
-                ReadScreen(url = args.url)
-            }
-
-            composable<BookShelfScreen> { }
-            composable<SearchScreen> {
-                SearchScreenRoute(
-                    onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) }
-                )
-            }
-            composable<ProfileScreen> {
-                ProfileScreenRoute(
-                    onNavigateToLogin = {}
-                )
-            }
+            BottomSheetHost(bottomSheetController = bottomSheetController)
         }
     }
 }

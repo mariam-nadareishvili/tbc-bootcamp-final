@@ -28,7 +28,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +58,7 @@ fun ReviewScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column() {
+            Column {
                 Text(
                     text = "Title",
                     fontSize = 32.sp,
@@ -91,7 +90,7 @@ fun ReviewScreen() {
             }
 
             Image(
-                painter = painterResource(R.drawable.background_gradient),
+                painter = painterResource(R.drawable.ic_placeholder),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(horizontal = 10.dp)

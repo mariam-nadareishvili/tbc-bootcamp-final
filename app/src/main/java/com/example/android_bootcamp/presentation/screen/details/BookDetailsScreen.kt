@@ -1,11 +1,8 @@
 package com.example.android_bootcamp.presentation.screen.details
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,11 +43,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,7 +59,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.android_bootcamp.R
 import com.example.android_bootcamp.presentation.screen.details.BookDetailsViewModel.BookDetailsUiEvent
-import com.example.android_bootcamp.presentation.screen.home.BookItem
 import com.example.android_bootcamp.presentation.screen.home.RatingBar
 import kotlinx.coroutines.flow.collectLatest
 
@@ -89,7 +84,7 @@ fun BookDetailsRoute(
                 is BookDetailsUiEvent.ShowError -> {}
 
                 is BookDetailsUiEvent.OnBackPress -> onBackPress()
-                else -> {}
+   
             }
         }
 
@@ -109,6 +104,8 @@ fun BookDetailsScreen(
     onBackPress: () -> Unit,
     onNavigateToBookDetails: (String) -> Unit
 ) {
+    var isFavorite by remember { mutableStateOf(false) }
+
     Box {
         Column(
             modifier = Modifier
@@ -128,11 +125,15 @@ fun BookDetailsScreen(
                     tint = colorResource(R.color.sky_blue)
                 )
                 Icon(
-                    painter = painterResource(R.drawable.ic_empty_heart),
-                    contentDescription = null,
+                    painter = painterResource(
+                        if (isFavorite) R.drawable.ic_full_heart else R.drawable.ic_empty_heart
+                    ), contentDescription = null,
                     modifier = Modifier
                         .padding(20.dp)
-                        .clickable { },
+                        .size(30.dp)
+                        .clickable {
+                            isFavorite = !isFavorite
+                        },
                     tint = Color.Red
                 )
             }
@@ -189,14 +190,14 @@ fun BookDetailsScreen(
                     Row() {
                         Icon(
                             imageVector = Icons.Default.Visibility, // 👁️ <-- your icon
-                            contentDescription = "Reads",
+                            contentDescription = "null",
                             tint = Color.Gray,
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .size(16.dp)
                         )
                         Text(
-                            text = "Read",
+                            text = stringResource(R.string.number_of_reads),
                             color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -218,7 +219,7 @@ fun BookDetailsScreen(
                                 .size(16.dp)
                         )
                         Text(
-                            text = "Votes",
+                            text = stringResource(R.string.number_of_votes),
                             color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -240,7 +241,7 @@ fun BookDetailsScreen(
                                 .size(16.dp)
                         )
                         Text(
-                            text = "Pages",
+                            text = stringResource(R.string.pages),
                             color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -278,7 +279,7 @@ fun BookDetailsScreen(
                             tint = MaterialTheme.colorScheme.background
                         )
                         Text(
-                            text = "Start reading",
+                            text = stringResource(R.string.button_start_reading),
                             fontSize = 20.sp,
                             color = MaterialTheme.colorScheme.background
                         )
@@ -294,27 +295,24 @@ fun BookDetailsScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
             Text(
-                text = "Introduction",
+                text = stringResource(R.string.introduction_of_book),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
             )
-            Spacer(modifier = Modifier.height(10.dp))
             state.bookDetails?.let {
                 ExpandableText(text = it.aboutBook)
             }
-            Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "About author",
+                text = stringResource(R.string.information_about_author),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
             )
-            Spacer(modifier = Modifier.height(20.dp))
             state.bookDetails?.let {
                 ExpandableText(text = it.aboutBook)
             }
@@ -335,7 +333,7 @@ fun BookDetailsScreen(
                     color = Color.Gray
                 )
                 Text(
-                    text = "Book reminds me of",
+                    text = stringResource(R.string.similar_books_title),
                     modifier = Modifier.padding(horizontal = 8.dp),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -388,7 +386,7 @@ fun ItemGenres(genre: String, modifier: Modifier = Modifier, selected: Boolean =
         modifier = modifier
             .clip(RoundedCornerShape(25.dp))
             .background(if (selected) Color.Black else Color.Gray)
-            .padding(horizontal = 20.dp, vertical = 2.dp) // Gives shape and space to text
+            .padding(horizontal = 20.dp, vertical = 2.dp)
     ) {
         Text(
             text = genre,
@@ -410,7 +408,7 @@ fun Review() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Reviews",
+            text = stringResource(R.string.reviews),
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -432,6 +430,7 @@ fun Review() {
         ExpandableCommentsBox(sampleComments)
     }
 }
+
 @Composable
 fun ExpandableCommentsBox(
     comments: List<Triple<String, Double, String>>,
@@ -442,10 +441,6 @@ fun ExpandableCommentsBox(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(16.dp)
-            )
             .padding(vertical = 12.dp)
             .animateContentSize()
     ) {
@@ -464,7 +459,9 @@ fun ExpandableCommentsBox(
 
         if (comments.size > minimizedMaxComments) {
             Text(
-                text = if (expanded) "Show Less ▲" else "View All Reviews ▼",
+                text = if (expanded) stringResource(R.string.show_less_information) else stringResource(
+                    R.string.view_all_reviews
+                ),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
@@ -479,6 +476,7 @@ fun ExpandableCommentsBox(
         }
     }
 }
+
 @Composable
 fun ExpandableText(
     text: String,
@@ -489,10 +487,6 @@ fun ExpandableText(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(16.dp)
-            )
             .padding(horizontal = 16.dp, vertical = 20.dp)
             .animateContentSize()
     ) {
@@ -508,12 +502,15 @@ fun ExpandableText(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = if (expanded) "Show Less ▲" else "Read More ▼",
+            text = if (expanded) stringResource(R.string.show_less_information) else stringResource(
+                R.string.read_more
+            ),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .align(Alignment.End)
+                .padding(end = 10.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
@@ -611,13 +608,12 @@ fun SimilarBookItem(imageUrl: String, title: String, modifier: Modifier = Modifi
         )
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun BookDetailsPreview() {
-    BookDetailsScreen(state = BookDetailsUiState(),
-        onNavigateToReadScreen = {},
-        onBackPress = {},
-        onNavigateToBookDetails = {}
-    )
+   BookDetailsScreen(state = BookDetailsUiState(
+       isLoading = false,
+       bookDetails = null,
+       similarBooks = listOf()
+   ), onNavigateToReadScreen = {}, onBackPress = {}) { }
 }
