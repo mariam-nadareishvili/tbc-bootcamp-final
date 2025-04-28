@@ -1,5 +1,6 @@
 package com.example.android_bootcamp.presentation.screen.profile
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,15 +38,18 @@ import com.example.android_bootcamp.R
 @Composable
 fun ProfileScreenRoute(
     viewmodel: ProfileViewModel = hiltViewModel(),
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    context: Context = LocalContext.current
 ) {
     val state by viewmodel.state.collectAsStateWithLifecycle()
-
 
     ProfileScreen(
         state = state,
         onToggleTheme = viewmodel::onToggleTheme,
-        onNavigateToLogin = viewmodel::navigateToLogin
+        onNavigateToLogin = viewmodel::navigateToLogin,
+        onToggleLanguage = { language ->
+            viewmodel.updateLanguage(language)
+        }
     )
 }
 
@@ -51,7 +57,8 @@ fun ProfileScreenRoute(
 fun ProfileScreen(
     state: ProfileUiState,
     onToggleTheme: (Boolean) -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onToggleLanguage: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -75,7 +82,7 @@ fun ProfileScreen(
         )
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "Email",
+            text = stringResource(R.string.email),
             fontSize = 16.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
@@ -94,17 +101,23 @@ fun ProfileScreen(
                     .size(30.dp)
             )
             Text(
-                text = "Language",
+                text = stringResource(R.string.change_language),
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(end = 110.dp)
             )
             Image(
-                painter = painterResource(R.drawable.geo),
-                contentDescription = null,
+                painter = painterResource(
+                    if (state.currentLanguage == "ka") R.drawable.geo
+                    else R.drawable.ic_log_out
+                ), contentDescription = null,
                 modifier = Modifier
                     .padding(end = 20.dp)
                     .size(40.dp)
+                    .clickable {
+                        val newLanguage = if (state.currentLanguage == "ka") "en" else "ka"
+                        onToggleLanguage(newLanguage)
+                    }
             )
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -166,6 +179,7 @@ fun ProfileScreen(
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen(state = ProfileUiState(), onToggleTheme = {}, onNavigateToLogin = {}
+    ProfileScreen(state = ProfileUiState(), onToggleTheme = {}, onNavigateToLogin = {},
+        onToggleLanguage = {}
     )
 }

@@ -1,18 +1,25 @@
 package com.example.android_bootcamp.presentation.helper
 
+import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import java.util.Locale
 
 object LocaleHelper {
 
     fun setLocale(context: Context, language: String) {
-        val locale = Locale(language)
-        Locale.setDefault(locale)
+        val currentLocale =
+            context.resources.configuration.locales.get(0) ?: Locale.getDefault()
 
-        val config = Configuration()
-        config.setLocale(locale)
+        if (currentLocale.language != language) {
+            val locale = Locale(language)
+            Locale.setDefault(locale)
 
-        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+            val resources = context.resources
+            val configuration = resources.configuration
+            configuration.setLocale(locale)
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+
+            (context as? Activity)?.recreate()
+        }
     }
 }

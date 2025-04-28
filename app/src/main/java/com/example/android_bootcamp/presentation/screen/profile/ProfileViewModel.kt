@@ -1,6 +1,5 @@
 package com.example.android_bootcamp.presentation.screen.profile
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.android_bootcamp.domain.useCase.ClearPreferencesUseCase
@@ -53,6 +52,7 @@ class ProfileViewModel @Inject constructor(
 //    }
     init {
         getCurrentTheme()
+        getCurrentLanguage()
     }
     // Get the current dark mode preference
 
@@ -71,12 +71,13 @@ class ProfileViewModel @Inject constructor(
             setDarkModeUseCase(isDarkMode)
             // Update UI state to reflect the new dark mode setting
             _state.update { it.copy(isDarkMode = isDarkMode) }
+        }
+    }
 
-            // Change the theme globally
-            if (isDarkMode) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+    private fun getCurrentLanguage() {
+        viewModelScope.launch {
+            getAppLanguageUseCase().collect { currentLanguage ->
+                _state.update { it.copy(currentLanguage = currentLanguage) }
             }
         }
     }
@@ -84,6 +85,10 @@ class ProfileViewModel @Inject constructor(
     fun updateLanguage(language: String) {
         viewModelScope.launch {
             updateLanguageUseCase(language)
+
+            _state.update {
+                it.copy(currentLanguage = language)
+            }
         }
     }
 

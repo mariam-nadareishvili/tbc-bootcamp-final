@@ -8,6 +8,7 @@ import ProfileScreen
 import Read
 import Register
 import SearchScreen
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -25,16 +26,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.android_bootcamp.data.local.store.PreferenceStore
+import com.example.android_bootcamp.domain.useCase.ClearPreferencesUseCase
+import com.example.android_bootcamp.domain.useCase.GetAppLanguageUseCase
+import com.example.android_bootcamp.domain.useCase.GetDarkModeUseCase
+import com.example.android_bootcamp.domain.useCase.SetDarkModeUseCase
+import com.example.android_bootcamp.domain.useCase.UpdateLanguageUseCase
 import com.example.android_bootcamp.presentation.screen.details.BookDetailsRoute
 import com.example.android_bootcamp.presentation.screen.home.HomeScreenRoute
 import com.example.android_bootcamp.presentation.screen.login.LoginScreenRoute
 import com.example.android_bootcamp.presentation.screen.profile.ProfileScreenRoute
+import com.example.android_bootcamp.presentation.screen.profile.ProfileViewModel
 import com.example.android_bootcamp.presentation.screen.read.ReadScreen
 import com.example.android_bootcamp.presentation.screen.register.RegisterScreenRoute
 import com.example.android_bootcamp.presentation.screen.search.SearchScreenRoute
@@ -79,7 +88,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                                     restoreState = true
                                 }
                             },
-                            label = { Text(item.label) },
+                            label = { Text(text = stringResource(id = item.labelId)) },
                             icon = {
                                 when (item) {
                                     is BottomNavItem.Home -> Icon(
