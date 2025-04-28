@@ -1,0 +1,13 @@
+package com.tbc.bookli.domain.useCase
+
+import javax.inject.Inject
+
+class PasswordValidationUseCase @Inject constructor() {
+    operator fun invoke(password: String): Boolean {
+        return password.length >= MIN_PASSWORD_LENGTH
+    }
+
+    companion object {
+        const val MIN_PASSWORD_LENGTH = 6
+    }
+}

@@ -40,6 +40,7 @@ hilt_navigation = "1.2.0"
 accompanist = "0.33.2-alpha"
 paging = "3.3.6"
 coil = "2.6.0"
+firebaseAppcheckPlayintegrity = "18.0.0"
 
 
 [libraries]
@@ -87,6 +88,7 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebaseAppcheckPlayintegrity" }
 
 
 [plugins]

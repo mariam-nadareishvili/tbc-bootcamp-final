@@ -10,12 +10,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.android_bootcamp"
+    namespace = "com.tbc.bookli"
     compileSdk = 35
 
 
     defaultConfig {
-        applicationId = "com.example.android_bootcamp"
+        applicationId = "com.tbc.bookli"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.appcheck.playintegrity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
