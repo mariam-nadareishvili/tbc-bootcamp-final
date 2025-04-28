@@ -1,19 +1,24 @@
+package com.tbc.bookli.presentation.navigation
+
 import kotlinx.serialization.Serializable
 
 
 sealed interface Screen
 
 @Serializable
-object Login : Screen
+data object Introduction : Screen
 
 @Serializable
-object Register : Screen
+data object Login : Screen
 
 @Serializable
-object HomeScreen : Screen
+data object Register : Screen
 
 @Serializable
-object BookShelfScreen : Screen
+data object HomeScreen : Screen
+
+@Serializable
+data object BookShelfScreen : Screen
 
 @Serializable
 data object SearchScreen : Screen

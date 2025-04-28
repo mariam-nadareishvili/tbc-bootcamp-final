@@ -58,4 +58,13 @@
     <string name="confirm_password">Confirm Password</string>
     <string name="search_here">Search here…</string>
     <string name="bookshelf">Bookshelf</string>
+    <string name="slide_title_explore_books">Explore Endless Books</string>
+    <string name="slide_description_explore_books">Browse a curated library of thousands of books across all genres.</string>
+    <string name="slide_title_read_anytime">Read Anytime, Anywhere</string>
+    <string name="slide_description_read_anytime">Dive into your favorite stories online, no downloads needed.</string>
+    <string name="slide_title_build_library">Build Your Library</string>
+    <string name="slide_description_build_library">Craft your personal bookshelf. Save, organize, and easily revisit the stories that inspire you most.</string>
+    <string name="get_started">Get Started</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
 </resources>

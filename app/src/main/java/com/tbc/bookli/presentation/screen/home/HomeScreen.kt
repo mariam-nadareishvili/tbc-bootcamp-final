@@ -242,7 +242,7 @@ fun BookItem(
 //fun HomeScreenPreview() {
 //    val state = HomeUiState()
 //    val pagerState = rememberPagerState(pageCount = { state.storyList.size })
-//    HomeScreen(
+//    com.tbc.bookli.presentation.navigation.HomeScreen(
 //        state = state,
 //        feedBookPaging = state.feedBookList.collectAsLazyPagingItems(),
 //        pagerState = pagerState,

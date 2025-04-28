@@ -58,4 +58,13 @@
     <string name="confirm_password">დაადასტურეთ პაროლი</string>
     <string name="search_here">ძიება…</string>
     <string name="bookshelf">ჩემი წიგნები</string>
+    <string name="slide_title_explore_books">აღმოაჩინე უსასრულო წიგნები</string>
+    <string name="slide_description_explore_books">დაათვალიერე ათასობით წიგნის სქრინული ბიბლიოთეკა ყველა ჟანრში.</string>
+    <string name="slide_title_read_anytime">წაიკითხე ნებისმიერ დროს და ადგილას</string>
+    <string name="slide_description_read_anytime">ჩაერთე საყვარელ ისტორიებში ონლაინ, გადმოწერის გარეშე.</string>
+    <string name="slide_title_build_library">შექმენი შენი ბიბლიოთეკა</string>
+    <string name="slide_description_build_library">შექმენი შენი პერსონალური წიგნების თარო — შეინახე, მოაწესრიგე და ადვილად დაუბრუნდი შთამაგონებელ ისტორიებს.</string>
+    <string name="get_started">დაწყება</string>
+    <string name="next">შემდეგი</string>
+    <string name="skip">გამოტოვება</string>
 </resources>

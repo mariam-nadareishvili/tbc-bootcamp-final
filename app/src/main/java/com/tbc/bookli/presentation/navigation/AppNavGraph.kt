@@ -2,14 +2,6 @@
 
 package com.tbc.bookli.presentation.navigation
 
-import BookDetails
-import BookShelfScreen
-import HomeScreen
-import Login
-import ProfileScreen
-import Read
-import Register
-import SearchScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -41,6 +33,7 @@ import com.tbc.bookli.presentation.screen.bottom_sheet.BottomSheetHost
 import com.tbc.bookli.presentation.screen.bottom_sheet.rememberBottomSheetController
 import com.tbc.bookli.presentation.screen.details.BookDetailsRoute
 import com.tbc.bookli.presentation.screen.home.HomeScreenRoute
+import com.tbc.bookli.presentation.screen.introduction.IntroductionScreen
 import com.tbc.bookli.presentation.screen.login.LoginScreenRoute
 import com.tbc.bookli.presentation.screen.profile.ProfileScreenRoute
 import com.tbc.bookli.presentation.screen.read.ReadScreen
@@ -125,6 +118,10 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                 startDestination = HomeScreen,
                 modifier = Modifier.fillMaxSize()
             ) {
+                composable<Introduction> {
+                    IntroductionScreen {}
+                }
+
                 composable<Login> {
                     LoginScreenRoute(
                         onNavigateToHome = { navController.navigate(HomeScreen) },

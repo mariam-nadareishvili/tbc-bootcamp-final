@@ -1,10 +1,5 @@
 package com.tbc.bookli.presentation.navigation
 
-import BookShelfScreen
-import HomeScreen
-import ProfileScreen
-import Screen
-import SearchScreen
 import androidx.annotation.StringRes
 import com.tbc.bookli.R
 

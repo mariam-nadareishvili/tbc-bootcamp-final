@@ -78,10 +78,10 @@ fun ProfileScreen(
     ) {
         Spacer(modifier = Modifier.height(60.dp))
         Image(
-            painter = painterResource(R.drawable.ic_placeholder),
+            painter = painterResource(R.drawable.ic_man),
             contentDescription = null,
             modifier = Modifier
-                .size(150.dp)
+                .size(120.dp)
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(70.dp)),
             contentScale = ContentScale.Crop
@@ -155,6 +155,7 @@ fun ProfileScreen(
                 modifier = Modifier
                     .padding(start = 10.dp)
 //                    .clickable { // TODO bottom sheet
+
 //                        onOpenBottomSheet(
 //                            BottomSheetContent.SelectBookList { selectedList ->
 //                                println("selected result: $selectedList")
