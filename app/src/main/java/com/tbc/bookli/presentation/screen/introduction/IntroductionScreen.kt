@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -41,13 +42,33 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.tbc.bookli.R
+import com.tbc.bookli.presentation.screen.introduction.IntroViewModel.IntroUiEvent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
+fun IntroductionRoute(
+    onNavigate: () -> Unit,
+    viewModel: IntroViewModel = hiltViewModel()
+) {
+    LaunchedEffect(Unit) {
+        viewModel.eventFlow.collectLatest { event ->
+            when (event) {
+                is IntroUiEvent.NavigateToNext -> onNavigate()
+            }
+        }
+    }
+
+    IntroductionScreen(
+        onFinished = viewModel::markIntroAsSeen
+    )
+}
+
+@Composable
 fun IntroductionScreen(
-    slides: List<IntroductionSlide> = introductionSlides,
-    onFinished: () -> Unit
+    onFinished: () -> Unit,
+    slides: List<IntroductionSlide> = introductionSlides
 ) {
     val pagerState = rememberPagerState(
         pageCount = { slides.size }

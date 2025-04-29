@@ -7,6 +7,7 @@ import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.useCase.EmailValidationUseCase
 import com.tbc.bookli.domain.useCase.LoginUseCase
 import com.tbc.bookli.domain.useCase.PasswordValidationUseCase
+import com.tbc.bookli.domain.useCase.SaveRememberMeUseCase
 import com.tbc.bookli.presentation.helper.SnackbarManager
 import com.tbc.bookli.presentation.helper.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val emailValidationUseCase: EmailValidationUseCase,
-    private val passwordValidationUseCase: PasswordValidationUseCase
+    private val passwordValidationUseCase: PasswordValidationUseCase,
+    private val saveRememberMeUseCase: SaveRememberMeUseCase
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow(LoginUiState())
@@ -83,6 +85,10 @@ class LoginViewModel @Inject constructor(
                     is Resource.Loading -> _loginState.update { it.copy(isLoading = result.isLoading) }
 
                     is Resource.Success -> {
+                        if (_loginState.value.isRememberMeChecked) {
+                            saveRememberMeUseCase(true)
+                        }
+
                         _uiEvents.emit(LoginUiEvents.NavigateToHomeScreen)
                     }
 

@@ -15,7 +15,7 @@ class CacheRepositoryImpl @Inject constructor(
         preferenceStore.saveRememberMe(rememberMe)
     }
 
-    override suspend fun clearPreferences() {
+    override suspend fun clearRememberMe() {
         preferenceStore.clearRememberMe()
     }
 
@@ -30,5 +30,11 @@ class CacheRepositoryImpl @Inject constructor(
 
     override suspend fun setDarkMode(isDarkMode: Boolean) {
         preferenceStore.saveDarkMode(isDarkMode)
+    }
+
+    override fun getIntroSeen(): Flow<Boolean> = preferenceStore.isIntroSeen
+
+    override suspend fun saveIntroSeen(seen: Boolean) {
+        preferenceStore.saveIntroSeen(seen)
     }
 }

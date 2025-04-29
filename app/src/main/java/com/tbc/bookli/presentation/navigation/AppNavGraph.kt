@@ -26,7 +26,7 @@ import com.tbc.bookli.presentation.screen.bottom_sheet.rememberBottomSheetContro
 import com.tbc.bookli.presentation.screen.bottombar.BottomBar
 import com.tbc.bookli.presentation.screen.details.BookDetailsRoute
 import com.tbc.bookli.presentation.screen.home.HomeScreenRoute
-import com.tbc.bookli.presentation.screen.introduction.IntroductionScreen
+import com.tbc.bookli.presentation.screen.introduction.IntroductionRoute
 import com.tbc.bookli.presentation.screen.login.LoginScreenRoute
 import com.tbc.bookli.presentation.screen.profile.ProfileScreenRoute
 import com.tbc.bookli.presentation.screen.read.ReadScreen
@@ -34,6 +34,7 @@ import com.tbc.bookli.presentation.screen.register.RegisterScreenRoute
 import com.tbc.bookli.presentation.screen.review.ReviewScreenRoute
 import com.tbc.bookli.presentation.screen.search.BookUi
 import com.tbc.bookli.presentation.screen.search.SearchScreenRoute
+import com.tbc.bookli.presentation.screen.splash.SplashRoute
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.reflect.typeOf
 
@@ -92,16 +93,46 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(
                 navController = navController,
-                startDestination = HomeScreen,
+                startDestination = Splash,
                 modifier = Modifier.fillMaxSize()
             ) {
+                composable<Splash> {
+                    SplashRoute(
+                        onNavigateToIntro = {
+                            navController.navigate(Introduction) {
+                                navController.popBackStack()
+                            }
+                        },
+                        onNavigateToLogin = {
+                            navController.navigate(Login) {
+                                navController.popBackStack()
+                            }
+                        },
+                        onNavigateToHome = {
+                            navController.navigate(HomeScreen) {
+                                navController.popBackStack()
+                            }
+                        },
+                    )
+                }
+
                 composable<Introduction> {
-                    IntroductionScreen {}
+                    IntroductionRoute(
+                        onNavigate = {
+                            navController.navigate(Login) {
+                                navController.popBackStack()
+                            }
+                        }
+                    )
                 }
 
                 composable<Login> {
                     LoginScreenRoute(
-                        onNavigateToHome = { navController.navigate(HomeScreen) },
+                        onNavigateToHome = {
+                            navController.navigate(HomeScreen) {
+                                navController.popBackStack()
+                            }
+                        },
                         onNavigateToRegister = { navController.navigate(Register) }
                     )
                 }
@@ -189,12 +220,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                 composable<ProfileScreen> {
                     ProfileScreenRoute(
                         onNavigateToLogin = {
-                            navController.popBackStack(
-                                route = navController.graph.startDestinationRoute
-                                    ?: return@ProfileScreenRoute,
-                                inclusive = true
-                            )
-                            navController.navigate(Login)
+                            navController.navigate(Login) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     )
                 }

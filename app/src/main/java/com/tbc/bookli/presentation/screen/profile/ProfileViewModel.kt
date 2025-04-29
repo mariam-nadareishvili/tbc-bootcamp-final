@@ -3,7 +3,7 @@ package com.tbc.bookli.presentation.screen.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tbc.bookli.common.Resource
-import com.tbc.bookli.domain.useCase.ClearPreferencesUseCase
+import com.tbc.bookli.domain.useCase.ClearRememberMeUseCase
 import com.tbc.bookli.domain.useCase.GetAppLanguageUseCase
 import com.tbc.bookli.domain.useCase.GetDarkModeUseCase
 import com.tbc.bookli.domain.useCase.GetUserUserInfoCase
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val updateLanguageUseCase: UpdateLanguageUseCase,
     private val getAppLanguageUseCase: GetAppLanguageUseCase,
-    private val clearPreferencesUseCase: ClearPreferencesUseCase,
+    private val clearRememberMeUseCase: ClearRememberMeUseCase,
     private val getDarkModeUseCase: GetDarkModeUseCase,
     private val setDarkModeUseCase: SetDarkModeUseCase,
     private val getUserInfoUseCase: GetUserUserInfoCase,
@@ -55,7 +55,6 @@ class ProfileViewModel @Inject constructor(
             is ProfileEvent.UpdateUserAvatar -> updateUserAvatar(event.newAvatar)
             is ProfileEvent.ShowDialog -> _state.update { it.copy(showDialog = true) }
             is ProfileEvent.HideDialog -> _state.update { it.copy(showDialog = false) }
-            is ProfileEvent.ClearPreferences -> clearPreferences()
             is ProfileEvent.NavigateToLogin -> navigateToLogin()
         }
     }
@@ -118,14 +117,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun clearPreferences() {
-        viewModelScope.launch(Dispatchers.IO) {
-//            clearPreferencesUseCase // call if function
-        }
-    }
-
     private fun navigateToLogin() {
         viewModelScope.launch {
+            clearRememberMeUseCase()
             _event.emit(ProfileUiEvents.NavigateToLogin)
         }
     }

@@ -9,6 +9,5 @@ sealed class ProfileEvent {
     data class UpdateUserAvatar(val newAvatar: AvatarType) : ProfileEvent()
     data object ShowDialog : ProfileEvent()
     data object HideDialog : ProfileEvent()
-    data object ClearPreferences : ProfileEvent()
     data object NavigateToLogin : ProfileEvent()
 }
