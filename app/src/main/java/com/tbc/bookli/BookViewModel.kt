@@ -32,7 +32,6 @@ class BookViewModel @Inject constructor(
         viewModelScope.launch {
             getCurrentLanguage().collect { language ->
                 _currentLanguage.value = language
-                println("language: $language")
             }
         }
     }

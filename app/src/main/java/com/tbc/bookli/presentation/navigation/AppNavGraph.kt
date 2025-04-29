@@ -165,6 +165,9 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                             navController.navigate(
                                 ReviewScreen(bookUi = book)
                             )
+                        },
+                        onOpenBottomSheet = { sheetContent ->
+                            bottomSheetController.openBottomSheet(sheetContent)
                         }
                     )
                 }

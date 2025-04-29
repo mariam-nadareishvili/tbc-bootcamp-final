@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.useCase.GetBookByIdUseCase
 import com.tbc.bookli.domain.useCase.GetSearchBooksUseCase
+import com.tbc.bookli.domain.useCase.UpdateBookByIdUseCase
+import com.tbc.bookli.presentation.mapper.toDomain
 import com.tbc.bookli.presentation.mapper.toPresentation
 import com.tbc.bookli.presentation.screen.search.BookUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailsViewModel @Inject constructor(
     private val getBookById: GetBookByIdUseCase,
-    private val searchBooks: GetSearchBooksUseCase
+    private val searchBooks: GetSearchBooksUseCase,
+    private val updateBookByIdUseCase: UpdateBookByIdUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BookDetailsUiState())
@@ -33,10 +36,21 @@ class BookDetailsViewModel @Inject constructor(
     fun onEvent(event: BookDetailsEvent) {
         when (event) {
             is BookDetailsEvent.LoadBookDetails -> loadBook(event.id)
-            is BookDetailsEvent.NavigateToRead -> emitUiEvent(BookDetailsUiEvent.NavigateToReadScreen(event.url))
-            is BookDetailsEvent.NavigateToBookDetails -> emitUiEvent(BookDetailsUiEvent.NavigateToBookDetails(event.id))
+            is BookDetailsEvent.NavigateToRead -> emitUiEvent(
+                BookDetailsUiEvent.NavigateToReadScreen(
+                    event.url
+                )
+            )
+
+            is BookDetailsEvent.NavigateToBookDetails -> emitUiEvent(
+                BookDetailsUiEvent.NavigateToBookDetails(
+                    event.id
+                )
+            )
+
             BookDetailsEvent.NavigateToReview -> navigateToReview()
             BookDetailsEvent.OnBackPress -> emitUiEvent(BookDetailsUiEvent.OnBackPress)
+            is BookDetailsEvent.UpdateBookStatus -> updateBookStatus(status = event.status)
         }
     }
 
@@ -49,6 +63,7 @@ class BookDetailsViewModel @Inject constructor(
                     _state.update { it.copy(bookDetails = bookUi) }
                     bookUi?.let { getSimilarBooks(it.genres.firstOrNull()?.name.orEmpty()) }
                 }
+
                 is Resource.Error -> emitUiEvent(BookDetailsUiEvent.ShowError(result.message))
             }
         }
@@ -60,6 +75,28 @@ class BookDetailsViewModel @Inject constructor(
                 is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
                 is Resource.Success -> _state.update { it.copy(similarBooks = result.data?.map { it.toPresentation() }) }
                 is Resource.Error -> emitUiEvent(BookDetailsUiEvent.ShowError(result.message))
+            }
+        }
+    }
+
+    private fun updateBookStatus(status: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val updatedBook = _state.value.bookDetails?.copy(status = status)
+            updateBookByIdUseCase(book = updatedBook!!.toDomain()).collectLatest { result ->
+                when (result) {
+                    is Resource.Loading -> _state.update {
+                        it.copy(isLoading = result.isLoading)
+                    }
+
+                    is Resource.Success -> {
+                        println("${updatedBook.status}")
+                        _state.update { it.copy(bookDetails = updatedBook) }
+                    }
+
+                    is Resource.Error -> {
+                        println("Resource.Error: ${result.message}")
+                    }
+                }
             }
         }
     }

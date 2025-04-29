@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.tbc.bookli.R
 import com.tbc.bookli.presentation.screen.AvatarType
+import com.tbc.bookli.presentation.screen.bottom_sheet.BottomSheetContent
 import com.tbc.bookli.presentation.screen.details.BookDetailsViewModel.BookDetailsUiEvent
 import com.tbc.bookli.presentation.screen.home.RatingBarReadOnly
 import com.tbc.bookli.presentation.screen.search.BookUi
@@ -72,15 +73,14 @@ fun BookDetailsRoute(
     onBackPress: () -> Unit,
     onNavigateToReadScreen: (String) -> Unit,
     onNavigateToBookDetails: (String) -> Unit,
-    onNavigateToReviewScreen: (BookUi) -> Unit
+    onNavigateToReviewScreen: (BookUi) -> Unit,
+    onOpenBottomSheet: (BottomSheetContent) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.onEvent(BookDetailsEvent.LoadBookDetails(id))
-    }
 
-    LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is BookDetailsUiEvent.NavigateToBookDetails -> onNavigateToBookDetails(event.id)
@@ -94,14 +94,22 @@ fun BookDetailsRoute(
 
     BookDetailsScreen(
         state = state,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        onOpenBottomSheet = {
+            onOpenBottomSheet(
+                BottomSheetContent.SelectBookList { selectedList ->
+                    viewModel.onEvent(BookDetailsEvent.UpdateBookStatus(selectedList))
+                }
+            )
+        }
     )
 }
 
 @Composable
 fun BookDetailsScreen(
     state: BookDetailsUiState,
-    onEvent: (BookDetailsEvent) -> Unit
+    onEvent: (BookDetailsEvent) -> Unit,
+    onOpenBottomSheet: () -> Unit
 ) {
     state.bookDetails?.run {
         Box {
@@ -129,7 +137,16 @@ fun BookDetailsScreen(
                         modifier = Modifier
                             .padding(20.dp)
                             .size(30.dp)
-                            .clickable {},
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                if (status != null) {
+                                    onEvent(BookDetailsEvent.UpdateBookStatus(null))
+                                } else {
+                                    onOpenBottomSheet()
+                                }
+                            },
                         tint = Color.Red
                     )
                 }

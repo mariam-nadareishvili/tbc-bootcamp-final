@@ -1,4 +1,4 @@
-package com.tbc.bookli.presentation.screen
+package com.tbc.bookli.presentation.screen.bottom_sheet
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -24,7 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 
 @Composable
-fun AddToBottomSheet() {
+fun FavoriteBookSheet(
+    onDone: (String) -> Unit,
+    initialSelection: BookListType = BookListType.FAVORITES
+) {
+    var selectedList by remember { mutableStateOf(initialSelection) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -47,33 +52,31 @@ fun AddToBottomSheet() {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable { }
+                    .clickable {
+                        onDone(selectedList.displayName)
+                    }
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
 
-        // Items
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            BottomSheetItem(
-                icon = Icons.Default.Star,
-                title = "Favorites",
-                isSelected = true,
-                onClick = { }
-            )
-            BottomSheetItem(
-                icon = Icons.Default.CollectionsBookmark,
-                title = "Reading",
-                isSelected = true,
-                onClick = { }
-            )
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            BookListType.entries.forEach { type ->
+                FavoriteItem(
+                    icon = when (type) {
+                        BookListType.FAVORITES -> Icons.Default.Star
+                        BookListType.READING -> Icons.Default.CollectionsBookmark
+                    },
+                    title = type.displayName,
+                    isSelected = type == selectedList,
+                    onClick = { selectedList = type }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun BottomSheetItem(
+fun FavoriteItem(
     icon: ImageVector,
     title: String,
     isSelected: Boolean,
@@ -116,10 +119,18 @@ fun BottomSheetItem(
     }
 }
 
+enum class BookListType(val displayName: String) {
+    FAVORITES("Favorites"),
+    READING("Reading")
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun BottomSheetItemsPreview() {
     MaterialTheme {
-        AddToBottomSheet()
+        FavoriteBookSheet(
+            onDone = {}
+        )
     }
 }
