@@ -1,6 +1,8 @@
 package com.tbc.bookli.domain.model
 
 data class User(
-    val firstName: String? = null,
-    val lastName: String? = null,
+    val id: String,
+    val fullName: String,
+    val email: String,
+    val avatar: String
 )

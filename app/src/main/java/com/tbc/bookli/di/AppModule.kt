@@ -4,6 +4,7 @@ import com.tbc.bookli.BuildConfig
 import com.tbc.bookli.data.remote.sevice.BookApiService
 import com.tbc.bookli.data.remote.sevice.LocationApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.tbc.bookli.data.remote.sevice.UserApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -61,5 +62,11 @@ object AppModule {
     @Singleton
     fun provideLocationApiService(retrofit: Retrofit): LocationApiService {
         return retrofit.create(LocationApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserApiService(retrofit: Retrofit): UserApiService {
+        return retrofit.create(UserApiService::class.java)
     }
 }

@@ -1,6 +1,5 @@
 package com.tbc.bookli.presentation.screen.register
 
-
 data class RegisterUiState(
     val email: String = "",
     val fullName: String = "",

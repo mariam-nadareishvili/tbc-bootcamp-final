@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tbc.bookli.R
-import com.tbc.bookli.presentation.screen.bottom_sheet.BottomSheetContent
 import com.tbc.bookli.presentation.screen.profile.ProfileViewModel.ProfileUiEvents
 import kotlinx.coroutines.flow.collectLatest
 
@@ -42,8 +41,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun ProfileScreenRoute(
     viewmodel: ProfileViewModel = hiltViewModel(),
-    onNavigateToLogin: () -> Unit,
-    onOpenBottomSheet: (BottomSheetContent) -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
     val state by viewmodel.state.collectAsStateWithLifecycle()
 
@@ -55,68 +53,70 @@ fun ProfileScreenRoute(
         }
     }
 
+    if (state.showDialog) {
+        AvatarSelectionDialog(
+            onAvatarSelected = {
+                viewmodel.onEvent(ProfileEvent.HideDialog)
+                viewmodel.onEvent(ProfileEvent.UpdateUserAvatar(it))
+            },
+            onDismissRequest = {
+                viewmodel.onEvent(ProfileEvent.HideDialog)
+            }
+        )
+    }
+
     ProfileScreen(
         state = state,
-        onToggleTheme = viewmodel::onToggleTheme,
-        onNavigateToLogin = viewmodel::navigateToLogin,
-        onToggleLanguage = viewmodel::toggleLanguage,
-        onOpenBottomSheet = onOpenBottomSheet
+        onEvent = viewmodel::onEvent
     )
 }
+
 
 @Composable
 fun ProfileScreen(
     state: ProfileUiState,
-    onToggleTheme: (Boolean) -> Unit,
-    onNavigateToLogin: () -> Unit,
-    onToggleLanguage: () -> Unit,
-    onOpenBottomSheet: (BottomSheetContent) -> Unit
+    onEvent: (ProfileEvent) -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(60.dp))
         Image(
-            painter = painterResource(R.drawable.ic_man),
+            painter = painterResource(state.userInfo?.avatar?.drawableRes ?: R.drawable.ic_rabbit),
             contentDescription = null,
             modifier = Modifier
                 .size(120.dp)
                 .align(Alignment.CenterHorizontally)
-                .clip(RoundedCornerShape(70.dp)),
+                .clip(RoundedCornerShape(70.dp))
+                .clickable { onEvent(ProfileEvent.ShowDialog) },
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(30.dp))
         Text(
-            text = "Name Surname",
+            text = state.userInfo?.fullName ?: "",
             fontSize = 18.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = stringResource(R.string.email),
+            text = state.userInfo?.email ?: "",
             fontSize = 16.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(80.dp))
-
         ProfileSection(
             leadingIconId = R.drawable.ic_web,
             textId = R.string.language,
             trailingContent = {
                 Image(
                     painter = painterResource(
-                        if (state.currentLanguage == LanguageType.GEORGIAN.language) {
-                            R.drawable.ic_uk
-                        } else {
-                            R.drawable.ic_geo
-                        }
-                    ), contentDescription = null,
+                        if (state.currentLanguage == LanguageType.GEORGIAN.language) R.drawable.ic_uk
+                        else R.drawable.ic_geo
+                    ),
+                    contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
-                        .clickable {
-                            onToggleLanguage()
-                        }
+                        .clickable { onEvent(ProfileEvent.ToggleLanguage) }
                 )
             }
         )
@@ -127,17 +127,17 @@ fun ProfileScreen(
             trailingContent = {
                 Switch(
                     checked = state.isDarkMode,
-                    onCheckedChange = { onToggleTheme(it) }
+                    onCheckedChange = { onEvent(ProfileEvent.ToggleTheme(it)) }
                 )
             }
         )
         Spacer(modifier = Modifier.height(40.dp))
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(1f))
+        HorizontalDivider(modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(20.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onNavigateToLogin() },
+                .clickable { onEvent(ProfileEvent.NavigateToLogin) },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -152,20 +152,12 @@ fun ProfileScreen(
                 text = stringResource(R.string.log_out),
                 fontSize = 20.sp,
                 color = Color.Red,
-                modifier = Modifier
-                    .padding(start = 10.dp)
-//                    .clickable { // TODO bottom sheet
-
-//                        onOpenBottomSheet(
-//                            BottomSheetContent.SelectBookList { selectedList ->
-//                                println("selected result: $selectedList")
-//                            }
-//                        )
-//                    }
+                modifier = Modifier.padding(start = 10.dp)
             )
         }
     }
 }
+
 
 @Composable
 fun ProfileSection(
@@ -200,9 +192,6 @@ fun ProfileSection(
 fun ProfileScreenPreview() {
     ProfileScreen(
         state = ProfileUiState(),
-        onToggleTheme = {},
-        onNavigateToLogin = {},
-        onToggleLanguage = {},
-        onOpenBottomSheet = {}
+        onEvent = {},
     )
 }

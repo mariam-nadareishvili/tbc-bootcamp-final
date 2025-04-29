@@ -1,13 +1,14 @@
-package com.tbc.bookli.presentation.register
+package com.tbc.bookli.presentation.screen.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tbc.bookli.common.Resource
+import com.tbc.bookli.domain.model.User
 import com.tbc.bookli.domain.useCase.EmailValidationUseCase
 import com.tbc.bookli.domain.useCase.PasswordValidationUseCase
 import com.tbc.bookli.domain.useCase.RegisterUseCase
-import com.tbc.bookli.presentation.screen.register.RegisterUiEvents
-import com.tbc.bookli.presentation.screen.register.RegisterUiState
+import com.tbc.bookli.domain.useCase.UpdateUserInfoUseCase
+import com.tbc.bookli.presentation.screen.AvatarType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val emailValidationUseCase: EmailValidationUseCase,
-    private val passwordValidationUseCase: PasswordValidationUseCase
+    private val passwordValidationUseCase: PasswordValidationUseCase,
+    private val updateUserUseCase: UpdateUserInfoUseCase
 ) : ViewModel() {
 
     private val _registerState =
@@ -51,7 +53,6 @@ class RegisterViewModel @Inject constructor(
                 }
             }
 
-
             registerUseCase(
                 email = registerState.value.email,
                 password = registerState.value.password
@@ -63,15 +64,34 @@ class RegisterViewModel @Inject constructor(
                     }
 
                     is Resource.Success -> {
-                        _registerState.update {
-                            it.copy(
-                            )
-                        }
-                        _uiEvents.emit(
-                            RegisterUiEvents.NavigateBackToLogin
-
-                        )
+                        updateUserInfo()
                     }
+                }
+            }
+        }
+    }
+
+    private suspend fun updateUserInfo() {
+        val userId = "ae9aff30-a102-4e36-bfc3-70d0a87efde9" // hardcoded id due to api restrictions
+        updateUserUseCase.invoke(
+            User(
+                id = userId,
+                fullName = registerState.value.fullName,
+                email = registerState.value.email,
+                avatar = AvatarType.RABBIT.key
+            )
+        ).collect { result ->
+            when (result) {
+                is Resource.Error -> {
+                    println("Error: ${result.message}")
+                }
+
+                is Resource.Loading -> _registerState.update {
+                    it.copy(isLoading = result.isLoading)
+                }
+
+                is Resource.Success -> {
+                    _uiEvents.emit(RegisterUiEvents.NavigateBackToLogin)
                 }
             }
         }

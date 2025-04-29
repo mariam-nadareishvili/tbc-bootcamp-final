@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tbc.bookli.R
-import com.tbc.bookli.presentation.register.RegisterViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

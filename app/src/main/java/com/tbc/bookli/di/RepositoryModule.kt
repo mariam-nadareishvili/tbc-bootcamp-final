@@ -5,11 +5,13 @@ import com.tbc.bookli.data.remote.repository.BookRepositoryImpl
 import com.tbc.bookli.data.remote.repository.LocationRepositoryImpl
 import com.tbc.bookli.data.remote.repository.LoginRepositoryImpl
 import com.tbc.bookli.data.remote.repository.RegisterRepositoryImpl
+import com.tbc.bookli.data.remote.repository.UserRepositoryImpl
 import com.tbc.bookli.domain.repository.BookRepository
 import com.tbc.bookli.domain.repository.CacheRepository
 import com.tbc.bookli.domain.repository.LocationRepository
 import com.tbc.bookli.domain.repository.LoginRepository
 import com.tbc.bookli.domain.repository.RegisterRepository
+import com.tbc.bookli.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -38,7 +40,11 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindUserRepository(
+    abstract fun bindLocationRepository(
         locationRepositoryImpl: LocationRepositoryImpl
     ): LocationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
 }

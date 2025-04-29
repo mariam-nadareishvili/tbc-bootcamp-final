@@ -176,12 +176,13 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                 }
 
                 composable<BookShelfScreen> {
-                    BookShelfScreenRoute(onNavigateToSavedBookScreen = {
-                        navController.navigate(
-                            SavedBooksScreen
-                        )
-                    })
-
+                    BookShelfScreenRoute(
+                        onNavigateToSavedBookScreen = {
+                            navController.navigate(
+                                SavedBooksScreen
+                            )
+                        }
+                    )
                 }
                 composable<SavedBooksScreen> {
                     SavedBooksScreen()
@@ -212,9 +213,6 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                                 inclusive = true
                             )
                             navController.navigate(Login)
-                        },
-                        onOpenBottomSheet = { sheetContent ->
-                            bottomSheetController.openBottomSheet(sheetContent)
                         }
                     )
                 }
