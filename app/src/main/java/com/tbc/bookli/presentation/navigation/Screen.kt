@@ -1,5 +1,6 @@
 package com.tbc.bookli.presentation.navigation
 
+import com.tbc.bookli.presentation.screen.search.BookUi
 import kotlinx.serialization.Serializable
 
 
@@ -30,7 +31,7 @@ data object ProfileScreen : Screen
 data object SavedBooksScreen : Screen
 
 @Serializable
-data object ReviewScreen : Screen
+data class ReviewScreen(val bookUi: BookUi) : Screen
 
 @Serializable
 data class BookDetails(val bookId: String) : Screen

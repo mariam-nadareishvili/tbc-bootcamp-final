@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -92,13 +94,12 @@ fun RegisterScreen(
             .fillMaxSize()
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_back),
+            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
             contentDescription = null,
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 30.dp, top = 40.dp)
+                .padding(start = 16.dp, top = 16.dp)
                 .clickable { onBackPress() },
-            tint = colorResource(R.color.sky_blue)
+            tint = Color.DarkGray
         )
         Column(
             modifier = Modifier.align(Alignment.Center),

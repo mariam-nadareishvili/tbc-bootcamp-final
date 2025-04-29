@@ -124,11 +124,9 @@ fun SearchScreen(
                 BookItem(
                     imageUrl = book.imageUrl,
                     title = book.title,
-                    author = book.author,
-                    ratingAndPriceVisible = true,
-                    rating = book.rating,
                     modifier = Modifier
-                        .clickable { onNavigateToBookDetails(book.id) }
+                        .clickable { onNavigateToBookDetails(book.id) },
+                    rating = book.rating
                 )
             }
         }

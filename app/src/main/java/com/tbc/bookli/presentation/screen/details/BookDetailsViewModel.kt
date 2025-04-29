@@ -6,6 +6,7 @@ import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.useCase.GetBookByIdUseCase
 import com.tbc.bookli.domain.useCase.GetSearchBooksUseCase
 import com.tbc.bookli.presentation.mapper.toPresentation
+import com.tbc.bookli.presentation.screen.search.BookUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -89,8 +90,10 @@ class BookDetailsViewModel @Inject constructor(
     }
 
     fun navigateToReviewScreen() {
-        viewModelScope.launch {
-            _uiEvents.emit(BookDetailsUiEvent.NavigateToReviewScreen)
+        _state.value.bookDetails?.let {
+            viewModelScope.launch {
+                _uiEvents.emit(BookDetailsUiEvent.NavigateToReviewScreen(it))
+            }
         }
     }
 
@@ -99,6 +102,6 @@ class BookDetailsViewModel @Inject constructor(
         data class NavigateToBookDetails(val id: String) : BookDetailsUiEvent()
         data class NavigateToReadScreen(val url: String) : BookDetailsUiEvent()
         data object OnBackPress : BookDetailsUiEvent()
-        data object NavigateToReviewScreen : BookDetailsUiEvent()
+        data class NavigateToReviewScreen(val bookUi: BookUi) : BookDetailsUiEvent()
     }
 }

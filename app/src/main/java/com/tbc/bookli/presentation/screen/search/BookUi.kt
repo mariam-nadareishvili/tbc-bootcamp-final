@@ -1,5 +1,8 @@
 package com.tbc.bookli.presentation.screen.search
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class BookUi(
     val id: String,
     val imageUrl: String,
@@ -17,10 +20,17 @@ data class BookUi(
     val reviews: List<ReviewUi>
 )
 
+@Serializable
 data class ReviewUi(
     val reviewerName: String,
     val date: String,
     val comment: String,
     val rating: Double,
     val avatar: String
+)
+
+@Serializable
+data class GenreUi(
+    val id: String,
+    val name: String
 )

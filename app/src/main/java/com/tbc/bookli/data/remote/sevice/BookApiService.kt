@@ -5,7 +5,9 @@ import com.tbc.bookli.data.remote.model.FeedBookDto
 import com.tbc.bookli.data.remote.model.GenreDto
 import com.tbc.bookli.data.remote.model.StoryDto
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -30,4 +32,7 @@ interface BookApiService {
 
     @GET("books-new/{id}")
     suspend fun getBookById(@Path("id") bookId: String): Response<BookDto>
+
+    @PUT("books-new/{id}")
+    suspend fun updateBookById(@Path("id") bookId: String, @Body bookDto: BookDto): Response<Unit>
 }

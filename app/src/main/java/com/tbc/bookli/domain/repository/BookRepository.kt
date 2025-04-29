@@ -14,4 +14,5 @@ interface BookRepository {
     fun getGenres(): Flow<Resource<List<Genre>>>
     fun searchBooks(search: String): Flow<Resource<List<Book>>>
     fun getBookById(id: String): Flow<Resource<Book>>
+    fun updateBookById(book: Book): Flow<Resource<Unit>>
 }

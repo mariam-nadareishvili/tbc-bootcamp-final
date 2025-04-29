@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Star
@@ -46,7 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +59,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.tbc.bookli.R
 import com.tbc.bookli.presentation.screen.details.BookDetailsViewModel.BookDetailsUiEvent
-import com.tbc.bookli.presentation.screen.home.RatingBar
+import com.tbc.bookli.presentation.screen.home.RatingBarReadOnly
+import com.tbc.bookli.presentation.screen.search.BookUi
 import com.tbc.bookli.presentation.screen.search.ReviewUi
 import kotlinx.coroutines.flow.collectLatest
 
@@ -70,7 +71,7 @@ fun BookDetailsRoute(
     viewModel: BookDetailsViewModel = hiltViewModel(),
     onNavigateToReadScreen: (String) -> Unit,
     onNavigateToBookDetails: (String) -> Unit,
-    onNavigateToReviewScreen: () -> Unit
+    onNavigateToReviewScreen: (BookUi) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -83,10 +84,11 @@ fun BookDetailsRoute(
                 is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(it.url)
                 is BookDetailsUiEvent.ShowError -> {}
                 is BookDetailsUiEvent.OnBackPress -> onBackPress()
-                is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen()
+                is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen(it.bookUi)
             }
         }
     }
+
     BookDetailsScreen(
         state = state,
         onNavigateToReadScreen = viewModel::navigateToReadScreen,
@@ -116,12 +118,12 @@ fun BookDetailsScreen(
                         .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_back),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
                         contentDescription = null,
                         modifier = Modifier
-                            .padding(20.dp)
+                            .padding(start = 16.dp, top = 16.dp)
                             .clickable { onBackPress() },
-                        tint = colorResource(R.color.sky_blue)
+                        tint = Color.DarkGray
                     )
 //                Icon(
 //                    painter = painterResource(
@@ -160,6 +162,7 @@ fun BookDetailsScreen(
                         .align(Alignment.CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
                     text = title,
                     fontSize = 20.sp,
@@ -167,7 +170,7 @@ fun BookDetailsScreen(
                         .align(Alignment.CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                RatingBar(
+                RatingBarReadOnly(
                     rating = rating,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     starSize = 24.dp
@@ -184,7 +187,7 @@ fun BookDetailsScreen(
                             Icon(
                                 imageVector = Icons.Default.Visibility,
                                 contentDescription = "null",
-                                tint = Color.Gray,
+                                tint = Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
                                     .size(16.dp)
@@ -206,7 +209,7 @@ fun BookDetailsScreen(
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = "Reads",
-                                tint = Color.Gray,
+                                tint = Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
                                     .size(16.dp)
@@ -228,7 +231,7 @@ fun BookDetailsScreen(
                             Icon(
                                 imageVector = Icons.Default.Bookmarks,
                                 contentDescription = "Reads",
-                                tint = Color.Gray,
+                                tint =  Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
                                     .size(16.dp)
@@ -551,7 +554,7 @@ fun CommentItem(review: ReviewUi) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                RatingBar(
+                RatingBarReadOnly(
                     rating = review.rating,
                     starSize = 14.dp,
                     showRatingNumber = false

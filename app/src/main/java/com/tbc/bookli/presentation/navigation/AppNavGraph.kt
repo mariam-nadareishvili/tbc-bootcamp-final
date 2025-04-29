@@ -33,7 +33,6 @@ import com.tbc.bookli.presentation.screen.bookshelf.BookShelfScreenRoute
 import com.tbc.bookli.presentation.screen.bottom_sheet.BottomSheetHost
 import com.tbc.bookli.presentation.screen.bottom_sheet.rememberBottomSheetController
 import com.tbc.bookli.presentation.screen.details.BookDetailsRoute
-import com.tbc.bookli.presentation.screen.review.ReviewScreen
 import com.tbc.bookli.presentation.screen.home.HomeScreenRoute
 import com.tbc.bookli.presentation.screen.introduction.IntroductionScreen
 import com.tbc.bookli.presentation.screen.login.LoginScreenRoute
@@ -41,9 +40,10 @@ import com.tbc.bookli.presentation.screen.profile.ProfileScreenRoute
 import com.tbc.bookli.presentation.screen.read.ReadScreen
 import com.tbc.bookli.presentation.screen.register.RegisterScreenRoute
 import com.tbc.bookli.presentation.screen.review.ReviewScreenRoute
-import com.tbc.bookli.presentation.screen.review.ReviewUiState
 import com.tbc.bookli.presentation.screen.savedBooksScreen.SavedBooksScreen
+import com.tbc.bookli.presentation.screen.search.BookUi
 import com.tbc.bookli.presentation.screen.search.SearchScreenRoute
+import kotlin.reflect.typeOf
 
 @Composable
 fun AppNavGraph(navController: NavHostController = rememberNavController()) {
@@ -131,7 +131,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                     LoginScreenRoute(
                         onNavigateToHome = { navController.navigate(HomeScreen) },
                         onNavigateToRegister = { navController.navigate(Register) },
-                        snackbarHostState = snackbarHostState // ✅ pass the SAME
+                        snackbarHostState = snackbarHostState
                     )
                 }
 
@@ -139,7 +139,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                     RegisterScreenRoute(
                         onBackPress = { navController.navigateUp() },
                         onNavigateBackToLogin = { navController.navigateUp() },
-                        snackbarHostState = snackbarHostState // ✅ pass the SAME
+                        snackbarHostState = snackbarHostState
                     )
                 }
 
@@ -161,7 +161,11 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                         },
                         onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) },
                         onBackPress = { navController.navigateUp() },
-                        onNavigateToReviewScreen = { navController.navigate(ReviewScreen) }
+                        onNavigateToReviewScreen = { book ->
+                            navController.navigate(
+                                ReviewScreen(bookUi = book)
+                            )
+                        }
                     )
                 }
 
@@ -184,16 +188,21 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
 
                 }
 
-                composable<ReviewScreen> {
-                    ReviewScreenRoute(onBackPress = { navController.navigateUp() }
-                    )
-
+                composable<ReviewScreen>(
+                    typeMap = mapOf(typeOf<BookUi>() to serializableType<BookUi>())
+                ) {
+                    val args = it.toRoute<ReviewScreen>()
+                    ReviewScreenRoute(
+                        book = args.bookUi,
+                        onBackPress = { navController.navigateUp() })
                 }
+
                 composable<SearchScreen> {
                     SearchScreenRoute(
                         onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) }
                     )
                 }
+
                 composable<ProfileScreen> {
                     ProfileScreenRoute(
                         onNavigateToLogin = {

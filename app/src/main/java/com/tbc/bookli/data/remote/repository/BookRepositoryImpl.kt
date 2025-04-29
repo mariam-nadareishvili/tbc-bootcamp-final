@@ -7,6 +7,7 @@ import androidx.paging.map
 import com.tbc.bookli.common.Resource
 import com.tbc.bookli.common.mapResource
 import com.tbc.bookli.data.mapper.toDomain
+import com.tbc.bookli.data.mapper.toDto
 import com.tbc.bookli.data.remote.sevice.BookApiService
 import com.tbc.bookli.data.remote.paging.FeedBookPagingSource
 import com.tbc.bookli.data.remote.safeApiCall
@@ -58,5 +59,11 @@ class BookRepositoryImpl @Inject constructor(
         return safeApiCall {
             apiService.getBookById(id)
         }.mapResource { it.toDomain() }
+    }
+
+    override fun updateBookById(book: Book): Flow<Resource<Unit>> {
+        return safeApiCall {
+            apiService.updateBookById(bookId = book.id, bookDto = book.toDto())
+        }
     }
 }

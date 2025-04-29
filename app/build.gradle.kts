@@ -111,4 +111,5 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
+    implementation(libs.kotlinx.datetime)
 }

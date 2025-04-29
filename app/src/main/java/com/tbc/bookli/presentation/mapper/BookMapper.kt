@@ -37,3 +37,33 @@ fun Review.toPresentation(): ReviewUi {
         avatar = avatar
     )
 }
+
+fun BookUi.toDomain(): Book {
+    return Book(
+        id = id,
+        imageUrl = imageUrl,
+        title = title,
+        author = author,
+        aboutAuthor = aboutAuthor,
+        aboutBook = aboutBook,
+        genres = genres.joinToString(",") { it.name },
+        source = source,
+        readBy = readBy,
+        pages = pages,
+        status = status,
+        rating = rating,
+        votes = votes,
+        reviews = reviews.map { it.toDomain() }
+    )
+}
+
+fun ReviewUi.toDomain(): Review {
+    return Review(
+        reviewerName = reviewerName,
+        date = date,
+        comment = comment,
+        rating = rating,
+        avatar = avatar
+    )
+}
+

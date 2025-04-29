@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
@@ -28,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.style.TextAlign
@@ -144,10 +142,10 @@ fun HomeScreen(
             items(feedBookPaging.itemCount) { index ->
                 feedBookPaging[index]?.let { feedBook ->
                     BookItem(
-                        modifier = Modifier
-                            .clickable { onNavigateToBookDetails(feedBook.id) },
                         imageUrl = feedBook.imageUrl,
                         title = feedBook.title,
+                        modifier = Modifier
+                            .clickable { onNavigateToBookDetails(feedBook.id) },
                         rating = feedBook.rating
                     )
                 }
@@ -194,9 +192,7 @@ fun BookItem(
     modifier: Modifier = Modifier,
     rating: Double? = null,
     starSize: Dp = 14.dp,
-    ratingAndPriceVisible: Boolean = true,
-    showRatingNumber: Boolean = true,
-    author: String? = null
+    showRatingNumber: Boolean = true
 ) {
     Column(
         modifier = modifier
@@ -223,7 +219,7 @@ fun BookItem(
         )
         rating?.let {
             Spacer(modifier = Modifier.height(6.dp))
-            RatingBar(
+            RatingBarReadOnly(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 rating = it,
                 showRatingNumber = showRatingNumber,
@@ -232,4 +228,3 @@ fun BookItem(
         }
     }
 }
-
