@@ -11,7 +11,7 @@ import retrofit2.http.Query
 
 interface BookApiService {
 
-    @GET("books-bff")
+    @GET("books-bff-new")
     suspend fun searchBooks(
         @Query("page") page: Int,
         @Query("limit") limit: Int
@@ -23,11 +23,11 @@ interface BookApiService {
     @GET("genres")
     suspend fun getGenres(): Response<List<GenreDto>>
 
-    @GET("books")
+    @GET("books-new")
     suspend fun searchBooks(
         @Query("search") search: String
     ): Response<List<BookDto>>
 
-    @GET("books/{id}")
+    @GET("books-new/{id}")
     suspend fun getBookById(@Path("id") bookId: String): Response<BookDto>
 }

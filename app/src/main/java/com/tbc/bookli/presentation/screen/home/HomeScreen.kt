@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -77,7 +79,6 @@ fun HomeScreenRoute(
     )
 }
 
-
 @Composable
 fun HomeScreen(
     state: HomeUiState,
@@ -88,58 +89,66 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Modern background
     ) {
-        Spacer(modifier = Modifier.height(5.dp))
-
+        // Stories Section (Carousel)
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(10))
-                .height(150.dp)
-                .background(Color.Gray) // Background applies *under* pager
+                .height(220.dp)
+                .padding(16.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer)
         ) { page ->
             StoryItem(
                 story = state.storyList[page],
                 modifier = Modifier
-                    .clickable {
-                        onNavigateToBookDetails(state.storyList[page].id)
-                    }
+                    .fillMaxSize()
+                    .clickable { onNavigateToBookDetails(state.storyList[page].id) }
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
+        // Pager Indicators
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            verticalAlignment = Alignment.CenterVertically
         ) {
             repeat(state.storyList.size) { index ->
                 val isSelected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
-                        .padding(4.dp)
-                        .size(if (isSelected) 10.dp else 8.dp) // Correct use of size here
+                        .padding(horizontal = 4.dp)
+                        .size(if (isSelected) 10.dp else 8.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(if (isSelected) Color.Black else Color.LightGray)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                        )
                 )
             }
         }
 
-
-        Spacer(modifier = Modifier.height(30.dp))
-        LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+        // Books Section (Grid)
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             items(feedBookPaging.itemCount) { index ->
-                val feedBook = feedBookPaging[index]
-                feedBook?.let { it ->
+                feedBookPaging[index]?.let { feedBook ->
                     BookItem(
                         modifier = Modifier
-                            .width(60.dp)
-                            .clickable { onNavigateToBookDetails(it.id) },
-                        imageUrl = it.imageUrl,
-                        title = it.title,
-                        rating = it.rating,
+                            .clickable { onNavigateToBookDetails(feedBook.id) },
+                        imageUrl = feedBook.imageUrl,
+                        title = feedBook.title,
+                        rating = feedBook.rating
                     )
                 }
             }
@@ -155,21 +164,26 @@ fun StoryItem(story: StoryUi, modifier: Modifier = Modifier) {
     ) {
         AsyncImage(
             model = story.imageUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentScale = ContentScale.Crop
+            contentDescription = "Story Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
-        Text(
-            text = story.quote,
-            fontSize = 16.sp,
-            color = Color.White,
+        Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .padding(top = 50.dp, start = 10.dp, end = 10.dp)
-
-
-        )
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(12.dp)
+        ) {
+            Text(
+                text = story.quote,
+                fontSize = 16.sp,
+                fontWeight = Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
@@ -179,56 +193,43 @@ fun BookItem(
     title: String,
     modifier: Modifier = Modifier,
     rating: Double? = null,
-    ratingAndPriceVisible: Boolean = true,
     starSize: Dp = 14.dp,
+    ratingAndPriceVisible: Boolean = true,
     showRatingNumber: Boolean = true,
     author: String? = null
 ) {
     Column(
-        modifier = modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .padding(12.dp)
     ) {
         AsyncImage(
             model = imageUrl,
-            contentDescription = null,
+            contentDescription = "Book Cover",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(256.dp)
-                .clip(RoundedCornerShape(20.dp)),
+                .height(220.dp)
+                .clip(RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = title,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             fontWeight = Bold,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth()
         )
-        if (ratingAndPriceVisible) {
-            rating?.let {
-                RatingBar(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    rating = it,
-                    showRatingNumber = showRatingNumber,
-                    starSize = starSize
-                )
-            }
-
-
+        rating?.let {
+            Spacer(modifier = Modifier.height(6.dp))
+            RatingBar(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                rating = it,
+                showRatingNumber = showRatingNumber,
+                starSize = starSize
+            )
         }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun HomeScreenPreview() {
-//    val state = HomeUiState()
-//    val pagerState = rememberPagerState(pageCount = { state.storyList.size })
-//    com.tbc.bookli.presentation.navigation.HomeScreen(
-//        state = state,
-//        feedBookPaging = state.feedBookList.collectAsLazyPagingItems(),
-//        pagerState = pagerState,
-//        onNavigateToBookDetails = {}
-//    )
-//}

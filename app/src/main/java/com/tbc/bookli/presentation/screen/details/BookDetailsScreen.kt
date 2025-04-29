@@ -52,7 +52,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,6 +60,7 @@ import coil.compose.AsyncImage
 import com.tbc.bookli.R
 import com.tbc.bookli.presentation.screen.details.BookDetailsViewModel.BookDetailsUiEvent
 import com.tbc.bookli.presentation.screen.home.RatingBar
+import com.tbc.bookli.presentation.screen.search.ReviewUi
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -80,16 +80,12 @@ fun BookDetailsRoute(
         viewModel.uiEvents.collectLatest {
             when (it) {
                 is BookDetailsUiEvent.NavigateToBookDetails -> onNavigateToBookDetails(it.id)
-
                 is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(it.url)
-
                 is BookDetailsUiEvent.ShowError -> {}
-
                 is BookDetailsUiEvent.OnBackPress -> onBackPress()
                 is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen()
             }
         }
-
     }
     BookDetailsScreen(
         state = state,
@@ -108,266 +104,255 @@ fun BookDetailsScreen(
     onNavigateToBookDetails: (String) -> Unit,
     onNavigateToReviewScreen: () -> Unit
 ) {
-    var isFavorite by remember { mutableStateOf(false) }
-
-    Box {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            Row(
+    state.bookDetails?.run {
+        Box {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_back),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_back),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .clickable { onBackPress() },
+                        tint = colorResource(R.color.sky_blue)
+                    )
+//                Icon(
+//                    painter = painterResource(
+//                        if (isFavorite) R.drawable.ic_full_heart else R.drawable.ic_empty_heart
+//                    ), contentDescription = null,
+//                    modifier = Modifier
+//                        .padding(20.dp)
+//                        .size(30.dp)
+//                        .clickable {
+//                            isFavorite = !isFavorite
+//                        },
+//                    tint = Color.Red
+//                )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+
+                AsyncImage(
+                    model = imageUrl,
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(20.dp)
-                        .clickable { onBackPress() },
-                    tint = colorResource(R.color.sky_blue)
+                        .padding(horizontal = 10.dp)
+                        .width(150.dp)
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(5))
+                        .align(Alignment.CenterHorizontally),
+
+                    contentScale = ContentScale.Crop
                 )
-                Icon(
-                    painter = painterResource(
-                        if (isFavorite) R.drawable.ic_full_heart else R.drawable.ic_empty_heart
-                    ), contentDescription = null,
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .size(30.dp)
-                        .clickable {
-                            isFavorite = !isFavorite
-                        },
-                    tint = Color.Red
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-            AsyncImage(
-                model = state.bookDetails?.imageUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .width(150.dp)
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(5))
-                    .align(Alignment.CenterHorizontally),
-
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-            state.bookDetails?.let {
                 Text(
-                    text = it.author,
+                    text = author,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            state.bookDetails?.let {
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = it.title,
+                    text = title,
                     fontSize = 20.sp,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            state.bookDetails?.let {
+                Spacer(modifier = Modifier.height(10.dp))
                 RatingBar(
-                    rating = state.bookDetails.rating,
+                    rating = rating,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     starSize = 24.dp
                 )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row() {
-                        Icon(
-                            imageVector = Icons.Default.Visibility, // 👁️ <-- your icon
-                            contentDescription = "null",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(16.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.number_of_reads),
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    StatItem(value = "2,42m")
-                }
-                VerticalDivider(
+                Row(
                     modifier = Modifier
-                        .height(32.dp)
-                )
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row() {
-                        Icon(
-                            imageVector = Icons.Default.Star, // 👁️ <-- your icon
-                            contentDescription = "Reads",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(16.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.number_of_votes),
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    StatItem(value = "58,5k")
-                }
-                VerticalDivider(
-                    modifier = Modifier
-                        .height(32.dp)
-                )
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row() {
-                        Icon(
-                            imageVector = Icons.Default.Bookmarks, // 👁️ <-- your icon
-                            contentDescription = "Reads",
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(16.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.pages),
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    StatItem(value = "81")
-                }
-            }
-            Spacer(modifier = Modifier.height(30.dp))
-
-            if (state.bookDetails?.source != null) {
-                Button(
-                    onClick = {
-                        onNavigateToReadScreen(state.bookDetails.source)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(horizontal = 10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onBackground
-                    )
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Row(
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row {
+                            Icon(
+                                imageVector = Icons.Default.Visibility,
+                                contentDescription = "null",
+                                tint = Color.Gray,
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(16.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.number_of_reads),
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        StatItem(value = readBy)
+                    }
+                    VerticalDivider(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                            .height(32.dp)
+                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Reads",
+                                tint = Color.Gray,
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(16.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.number_of_votes),
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        StatItem(value = votes)
+                    }
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(32.dp)
+                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row() {
+                            Icon(
+                                imageVector = Icons.Default.Bookmarks,
+                                contentDescription = "Reads",
+                                tint = Color.Gray,
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(16.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.pages),
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        StatItem(value = pages.toString())
+                    }
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+
+                if (source != null) {
+                    Button(
+                        onClick = {
+                            onNavigateToReadScreen(source)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .padding(horizontal = 10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onBackground
+                        )
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_read),
-                            contentDescription = null,
+                        Row(
                             modifier = Modifier
-                                .padding(end = 20.dp)
-                                .size(25.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Text(
-                            text = stringResource(R.string.button_start_reading),
-                            fontSize = 20.sp,
-                            color = MaterialTheme.colorScheme.background
-                        )
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_read),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .padding(end = 20.dp)
+                                    .size(25.dp),
+                                tint = MaterialTheme.colorScheme.background
+                            )
+                            Text(
+                                text = stringResource(R.string.button_start_reading),
+                                fontSize = 20.sp,
+                                color = MaterialTheme.colorScheme.background
+                            )
+                        }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            LazyRow {
-                state.bookDetails?.let {
-                    items(it.genres) { genre ->
-                        ItemGenres(genre = genre.name, modifier = Modifier.padding(start = 20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+                LazyRow {
+                    items(genres) { genre ->
+                        ItemGenres(
+                            genre = genre.name,
+                            modifier = Modifier.padding(start = 20.dp)
+                        )
 
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(30.dp))
-            Text(
-                text = stringResource(R.string.introduction_of_book),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-            )
-            state.bookDetails?.let {
-                ExpandableText(text = it.aboutBook)
-            }
-            Text(
-                text = stringResource(R.string.information_about_author),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-            )
-            state.bookDetails?.let {
-                ExpandableText(text = it.aboutBook)
-            }
-
-            Review(onNavigateToReviewScreen = onNavigateToReviewScreen)
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(4.dp),
-                    color = Color.Gray
-                )
+                Spacer(modifier = Modifier.height(30.dp))
                 Text(
-                    text = stringResource(R.string.similar_books_title),
-                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = stringResource(R.string.introduction_of_book),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                )
-                HorizontalDivider(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(3.dp),
-                    color = Color.Gray
+                        .padding(horizontal = 20.dp)
                 )
-            }
-            LazyRow(
-                modifier = Modifier
-                    .padding(vertical = 20.dp)
-            ) {
-                state.similarBooks?.let {
-                    items(it) { book ->
-                        SimilarBookItem(
-                            imageUrl = book.imageUrl,
-                            title = book.title,
-                            modifier = Modifier
-                                .clickable { onNavigateToBookDetails(book.id) }
-                        )
+                ExpandableText(text = aboutBook)
+                Text(
+                    text = stringResource(R.string.information_about_author),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                )
+                ExpandableText(text = aboutBook)
+                Review(
+                    reviews = state.bookDetails.reviews,
+                    onNavigateToReviewScreen = onNavigateToReviewScreen
+                )
+                Spacer(modifier = Modifier.height(40.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(4.dp),
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = stringResource(R.string.similar_books_title),
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(3.dp),
+                        color = Color.Gray
+                    )
+                }
+                LazyRow(
+                    modifier = Modifier
+                        .padding(vertical = 20.dp)
+                ) {
+                    state.similarBooks?.let {
+                        items(it) { book ->
+                            SimilarBookItem(
+                                imageUrl = book.imageUrl,
+                                title = book.title,
+                                modifier = Modifier
+                                    .clickable { onNavigateToBookDetails(book.id) }
+                            )
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.height(40.dp))
             }
-            Spacer(modifier = Modifier.height(40.dp))
         }
-
-
     }
 }
 
@@ -402,7 +387,7 @@ fun ItemGenres(genre: String, modifier: Modifier = Modifier, selected: Boolean =
 
 
 @Composable
-fun Review(onNavigateToReviewScreen: () -> Unit) {
+fun Review(reviews: List<ReviewUi>, onNavigateToReviewScreen: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -422,7 +407,7 @@ fun Review(onNavigateToReviewScreen: () -> Unit) {
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.width(4.dp)) // Small space between icon and text
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "Leave your review",
                 fontSize = 18.sp,
@@ -430,30 +415,22 @@ fun Review(onNavigateToReviewScreen: () -> Unit) {
                 color = MaterialTheme.colorScheme.primary,
             )
         }
-        Text(
-            text = stringResource(R.string.reviews),
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        val sampleComments = listOf(
-            Triple("Nino", 4.5, "Beautifully written. I couldn't put it down."),
-            Triple("Giorgi", 3.0, "Interesting story but a bit slow in the middle."),
-            Triple("Tamar", 5.0, "Absolutely loved every part of it. Highly recommend!"),
-            Triple("Luka", 4.2, "Great character development and engaging plot."),
-            Triple("Salome", 2.5, "Not what I expected. The ending was disappointing."),
-            Triple("Ana", 4.0, "Good read with a few unexpected twists."),
-            Triple("Dato", 3.8, "Well-written but I wish it was longer."),
-            Triple("Mariam", 5.0, "A masterpiece. Will definitely re-read this.")
-        )
+        if (reviews.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.reviews),
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
-        ExpandableCommentsBox(sampleComments)
+            ExpandableCommentsBox(reviews = reviews)
+        }
     }
 }
 
 @Composable
 fun ExpandableCommentsBox(
-    comments: List<Triple<String, Double, String>>,
+    reviews: List<ReviewUi>,
     minimizedMaxComments: Int = 3
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -463,12 +440,12 @@ fun ExpandableCommentsBox(
             .padding(vertical = 20.dp)
             .animateContentSize()
     ) {
-        val visibleComments = if (expanded) comments else comments.take(minimizedMaxComments)
+        val visibleReviews = if (expanded) reviews else reviews.take(minimizedMaxComments)
 
-        visibleComments.forEachIndexed { index, (name, rate, comment) ->
-            CommentItem(name, rate, comment)
+        visibleReviews.forEachIndexed { index, review ->
+            CommentItem(review = review)
 
-            if (index != visibleComments.lastIndex) {
+            if (index != visibleReviews.lastIndex) {
                 Divider(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                     modifier = Modifier.padding(vertical = 12.dp)
@@ -476,7 +453,7 @@ fun ExpandableCommentsBox(
             }
         }
 
-        if (comments.size > minimizedMaxComments) {
+        if (reviews.size > minimizedMaxComments) {
             Text(
                 text = if (expanded) stringResource(R.string.show_less_information) else stringResource(
                     R.string.view_all_reviews
@@ -542,7 +519,7 @@ fun ExpandableText(
 }
 
 @Composable
-fun CommentItem(name: String, rate: Double, comment: String) {
+fun CommentItem(review: ReviewUi) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -550,7 +527,7 @@ fun CommentItem(name: String, rate: Double, comment: String) {
         verticalAlignment = Alignment.Top
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_placeholder),
+            painter = painterResource(getAvatarDrawable(review.avatar)),
             contentDescription = "Profile",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -568,14 +545,14 @@ fun CommentItem(name: String, rate: Double, comment: String) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = name,
+                    text = review.reviewerName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 RatingBar(
-                    rating = rate,
+                    rating = review.rating,
                     starSize = 14.dp,
                     showRatingNumber = false
                 )
@@ -584,7 +561,7 @@ fun CommentItem(name: String, rate: Double, comment: String) {
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = comment,
+                text = review.comment,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
                 lineHeight = 20.sp
@@ -593,7 +570,7 @@ fun CommentItem(name: String, rate: Double, comment: String) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Apr 24, 2025",
+                text = review.date,
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
@@ -628,12 +605,20 @@ fun SimilarBookItem(imageUrl: String, title: String, modifier: Modifier = Modifi
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun BookDetailsPreview() {
-    BookDetailsScreen(state = BookDetailsUiState(
-        isLoading = false,
-        bookDetails = null,
-        similarBooks = listOf()
-    ), onNavigateToReadScreen = {}, onBackPress = {}, onNavigateToBookDetails = {}) { }
+fun getAvatarDrawable(name: String): Int {
+    return when (name.lowercase()) {
+        "alien" -> R.drawable.ic_alien
+        "cool" -> R.drawable.ic_cool
+        "giraffe" -> R.drawable.ic_giraffe
+        "gorilla" -> R.drawable.ic_gorilla
+        "hacker" -> R.drawable.ic_hacker
+        "man" -> R.drawable.ic_man
+        "man_gray" -> R.drawable.ic_man_gray
+        "rabbit" -> R.drawable.ic_rabbit
+        "spaceship" -> R.drawable.ic_spaceship
+        "tiger" -> R.drawable.ic_tiger
+        "woman_red" -> R.drawable.ic_woman_red
+        "woman_yellow" -> R.drawable.ic_woman_yellow
+        else -> R.drawable.ic_rabbit
+    }
 }

@@ -8,7 +8,6 @@ fun FeedBook.toPresentation(): FeedBookUi {
         id = id,
         imageUrl = imageUrl,
         title = title,
-        rating = rating,
-        averagePrice = averagePrice
+        rating = rating
     )
 }

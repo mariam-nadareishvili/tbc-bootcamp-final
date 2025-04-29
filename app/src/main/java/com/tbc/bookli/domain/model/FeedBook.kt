@@ -6,5 +6,4 @@ data class FeedBook(
     val imageUrl: String,
     val title: String,
     val rating: Double,
-    val averagePrice: Double
 )
