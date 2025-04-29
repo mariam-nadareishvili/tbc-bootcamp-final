@@ -98,7 +98,7 @@ fun RatingBarReadOnly(
         }
         if (showRatingNumber) {
             Text(
-                text = "$rating",
+                text = rating.toString(),
                 fontSize = 16.sp,
                 modifier = Modifier
                     .padding(horizontal = 5.dp, vertical = 4.dp)

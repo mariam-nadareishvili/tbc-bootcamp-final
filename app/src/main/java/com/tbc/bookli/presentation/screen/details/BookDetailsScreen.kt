@@ -58,6 +58,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.tbc.bookli.R
+import com.tbc.bookli.presentation.screen.AvatarType
 import com.tbc.bookli.presentation.screen.details.BookDetailsViewModel.BookDetailsUiEvent
 import com.tbc.bookli.presentation.screen.home.RatingBarReadOnly
 import com.tbc.bookli.presentation.screen.search.BookUi
@@ -67,8 +68,8 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun BookDetailsRoute(
     id: String,
-    onBackPress: () -> Unit,
     viewModel: BookDetailsViewModel = hiltViewModel(),
+    onBackPress: () -> Unit,
     onNavigateToReadScreen: (String) -> Unit,
     onNavigateToBookDetails: (String) -> Unit,
     onNavigateToReviewScreen: (BookUi) -> Unit
@@ -76,35 +77,31 @@ fun BookDetailsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.getBookDetails(id = id)
+        viewModel.onEvent(BookDetailsEvent.LoadBookDetails(id))
+    }
 
-        viewModel.uiEvents.collectLatest {
-            when (it) {
-                is BookDetailsUiEvent.NavigateToBookDetails -> onNavigateToBookDetails(it.id)
-                is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(it.url)
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collectLatest { event ->
+            when (event) {
+                is BookDetailsUiEvent.NavigateToBookDetails -> onNavigateToBookDetails(event.id)
+                is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(event.url)
+                is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen(event.bookUi)
+                BookDetailsUiEvent.OnBackPress -> onBackPress()
                 is BookDetailsUiEvent.ShowError -> {}
-                is BookDetailsUiEvent.OnBackPress -> onBackPress()
-                is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen(it.bookUi)
             }
         }
     }
 
     BookDetailsScreen(
         state = state,
-        onNavigateToReadScreen = viewModel::navigateToReadScreen,
-        onBackPress = viewModel::navigateBack,
-        onNavigateToBookDetails = viewModel::navigateToBookDetails,
-        onNavigateToReviewScreen = viewModel::navigateToReviewScreen
+        onEvent = viewModel::onEvent
     )
 }
 
 @Composable
 fun BookDetailsScreen(
     state: BookDetailsUiState,
-    onNavigateToReadScreen: (String?) -> Unit,
-    onBackPress: () -> Unit,
-    onNavigateToBookDetails: (String) -> Unit,
-    onNavigateToReviewScreen: () -> Unit
+    onEvent: (BookDetailsEvent) -> Unit
 ) {
     state.bookDetails?.run {
         Box {
@@ -122,21 +119,19 @@ fun BookDetailsScreen(
                         contentDescription = null,
                         modifier = Modifier
                             .padding(start = 16.dp, top = 16.dp)
-                            .clickable { onBackPress() },
+                            .clickable { onEvent(BookDetailsEvent.OnBackPress) },
                         tint = Color.DarkGray
                     )
-//                Icon(
-//                    painter = painterResource(
-//                        if (isFavorite) R.drawable.ic_full_heart else R.drawable.ic_empty_heart
-//                    ), contentDescription = null,
-//                    modifier = Modifier
-//                        .padding(20.dp)
-//                        .size(30.dp)
-//                        .clickable {
-//                            isFavorite = !isFavorite
-//                        },
-//                    tint = Color.Red
-//                )
+                    Icon(
+                        painter = painterResource(
+                            if (status != null) R.drawable.ic_full_heart else R.drawable.ic_empty_heart
+                        ), contentDescription = null,
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .size(30.dp)
+                            .clickable {},
+                        tint = Color.Red
+                    )
                 }
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -227,11 +222,11 @@ fun BookDetailsScreen(
                             .height(32.dp)
                     )
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Row() {
+                        Row {
                             Icon(
                                 imageVector = Icons.Default.Bookmarks,
                                 contentDescription = "Reads",
-                                tint =  Color.Red,
+                                tint = Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
                                     .size(16.dp)
@@ -246,11 +241,10 @@ fun BookDetailsScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(30.dp))
-
-                if (source != null) {
+                source?.let {
                     Button(
                         onClick = {
-                            onNavigateToReadScreen(source)
+                            onEvent(BookDetailsEvent.NavigateToRead(source))
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -311,7 +305,9 @@ fun BookDetailsScreen(
                 ExpandableText(text = aboutBook)
                 Review(
                     reviews = state.bookDetails.reviews,
-                    onNavigateToReviewScreen = onNavigateToReviewScreen
+                    onNavigateToReviewScreen = {
+                        onEvent(BookDetailsEvent.NavigateToReview)
+                    }
                 )
                 Spacer(modifier = Modifier.height(40.dp))
                 Row(
@@ -348,7 +344,7 @@ fun BookDetailsScreen(
                                 imageUrl = book.imageUrl,
                                 title = book.title,
                                 modifier = Modifier
-                                    .clickable { onNavigateToBookDetails(book.id) }
+                                    .clickable { onEvent(BookDetailsEvent.NavigateToBookDetails(book.id)) }
                             )
                         }
                     }
@@ -530,7 +526,7 @@ fun CommentItem(review: ReviewUi) {
         verticalAlignment = Alignment.Top
     ) {
         Image(
-            painter = painterResource(getAvatarDrawable(review.avatar)),
+            painter = painterResource(AvatarType.fromKey(review.avatar).drawableRes),
             contentDescription = "Profile",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -605,23 +601,5 @@ fun SimilarBookItem(imageUrl: String, title: String, modifier: Modifier = Modifi
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center
         )
-    }
-}
-
-fun getAvatarDrawable(name: String): Int {
-    return when (name.lowercase()) {
-        "alien" -> R.drawable.ic_alien
-        "cool" -> R.drawable.ic_cool
-        "giraffe" -> R.drawable.ic_giraffe
-        "gorilla" -> R.drawable.ic_gorilla
-        "hacker" -> R.drawable.ic_hacker
-        "man" -> R.drawable.ic_man
-        "man_gray" -> R.drawable.ic_man_gray
-        "rabbit" -> R.drawable.ic_rabbit
-        "spaceship" -> R.drawable.ic_spaceship
-        "tiger" -> R.drawable.ic_tiger
-        "woman_red" -> R.drawable.ic_woman_red
-        "woman_yellow" -> R.drawable.ic_woman_yellow
-        else -> R.drawable.ic_rabbit
     }
 }
