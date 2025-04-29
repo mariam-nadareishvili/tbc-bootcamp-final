@@ -87,7 +87,6 @@ fun BookDetailsRoute(
                 is BookDetailsUiEvent.NavigateToReadScreen -> onNavigateToReadScreen(event.url)
                 is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen(event.bookUi)
                 BookDetailsUiEvent.OnBackPress -> onBackPress()
-                is BookDetailsUiEvent.ShowError -> {}
             }
         }
     }
@@ -198,7 +197,7 @@ fun BookDetailsScreen(
                         Row {
                             Icon(
                                 imageVector = Icons.Default.Visibility,
-                                contentDescription = "null",
+                                contentDescription = null,
                                 tint = Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
@@ -220,7 +219,7 @@ fun BookDetailsScreen(
                         Row {
                             Icon(
                                 imageVector = Icons.Default.Star,
-                                contentDescription = "Reads",
+                                contentDescription = null,
                                 tint = Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
@@ -242,7 +241,7 @@ fun BookDetailsScreen(
                         Row {
                             Icon(
                                 imageVector = Icons.Default.Bookmarks,
-                                contentDescription = "Reads",
+                                contentDescription = null,
                                 tint = Color.Red,
                                 modifier = Modifier
                                     .padding(end = 10.dp)
@@ -544,7 +543,7 @@ fun CommentItem(review: ReviewUi) {
     ) {
         Image(
             painter = painterResource(AvatarType.fromKey(review.avatar).drawableRes),
-            contentDescription = "Profile",
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(48.dp)

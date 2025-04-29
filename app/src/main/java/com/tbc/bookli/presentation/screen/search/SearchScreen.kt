@@ -41,31 +41,28 @@ fun SearchScreenRoute(
     onNavigateToBookDetails: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is SearchViewModel.SearchUiEvent.NavigateToBookDetail -> onNavigateToBookDetails(
                     event.id
                 )
-
-                is SearchViewModel.SearchUiEvent.ShowError -> {}
             }
         }
     }
+
     SearchScreen(
         state = state,
-        onNavigateToBookDetails = viewModel::navigateToBookDetails,
-        onSearchQueryChange = viewModel::search,
-        onSelectGenre = viewModel::searchByGenre
+        onEvent = viewModel::onEvent
     )
 }
+
 
 @Composable
 fun SearchScreen(
     state: SearchUiState,
-    onNavigateToBookDetails: (String) -> Unit,
-    onSearchQueryChange: (String) -> Unit,
-    onSelectGenre: (String) -> Unit
+    onEvent: (SearchEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -74,8 +71,13 @@ fun SearchScreen(
         Spacer(modifier = Modifier.height(36.dp))
         TextField(
             value = state.searchQuery,
-            onValueChange = { newValue -> onSearchQueryChange(newValue) },
-            placeholder = { Text(stringResource(R.string.search_here), modifier = Modifier.padding(top = 2.dp)) },
+            onValueChange = { onEvent(SearchEvent.QueryChanged(it)) },
+            placeholder = {
+                Text(
+                    stringResource(R.string.search_here),
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
@@ -108,8 +110,11 @@ fun SearchScreen(
                 items(state.genres) { genre ->
                     ItemGenres(
                         genre = genre.name,
-                        selected = genre.name==state.selectedGenre,
-                        modifier = Modifier.clickable { onSelectGenre(genre.name) })
+                        selected = genre.name == state.selectedGenre,
+                        modifier = Modifier.clickable {
+                            onEvent(SearchEvent.GenreSelected(genre.name))
+                        }
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
@@ -125,7 +130,7 @@ fun SearchScreen(
                     imageUrl = book.imageUrl,
                     title = book.title,
                     modifier = Modifier
-                        .clickable { onNavigateToBookDetails(book.id) },
+                        .clickable { onEvent(SearchEvent.BookClicked(book.id)) },
                     rating = book.rating
                 )
             }
@@ -138,8 +143,6 @@ fun SearchScreen(
 fun SearchScreenPreview() {
     SearchScreen(
         state = SearchUiState(),
-        onNavigateToBookDetails = {},
-        onSearchQueryChange = {},
-        onSelectGenre = {}
+        onEvent = {}
     )
 }

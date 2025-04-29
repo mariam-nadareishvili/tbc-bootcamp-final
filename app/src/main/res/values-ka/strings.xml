@@ -67,4 +67,7 @@
     <string name="get_started">დაწყება</string>
     <string name="next">შემდეგი</string>
     <string name="skip">გამოტოვება</string>
+    <string name="invalid_password">პაროლი არასწორია!</string>
+    <string name="invalid_email">მეილი არასწორია!</string>
+    <string name="password_doesn_t_match">პაროლები არ ემთხვევა!</string>
 </resources>

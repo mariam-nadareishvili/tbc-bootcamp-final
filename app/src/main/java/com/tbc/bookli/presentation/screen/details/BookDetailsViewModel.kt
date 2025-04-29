@@ -7,6 +7,8 @@ import com.tbc.bookli.domain.model.BookStatus
 import com.tbc.bookli.domain.useCase.GetBookByIdUseCase
 import com.tbc.bookli.domain.useCase.GetSearchBooksUseCase
 import com.tbc.bookli.domain.useCase.UpdateBookByIdUseCase
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import com.tbc.bookli.presentation.mapper.toDomain
 import com.tbc.bookli.presentation.mapper.toPresentation
 import com.tbc.bookli.presentation.screen.search.BookUi
@@ -65,7 +67,8 @@ class BookDetailsViewModel @Inject constructor(
                     bookUi?.let { getSimilarBooks(it.genres.firstOrNull()?.name.orEmpty()) }
                 }
 
-                is Resource.Error -> emitUiEvent(BookDetailsUiEvent.ShowError(result.message))
+                is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
+
             }
         }
     }
@@ -75,7 +78,7 @@ class BookDetailsViewModel @Inject constructor(
             when (result) {
                 is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
                 is Resource.Success -> _state.update { it.copy(similarBooks = result.data?.map { it.toPresentation() }) }
-                is Resource.Error -> emitUiEvent(BookDetailsUiEvent.ShowError(result.message))
+                is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
             }
         }
     }
@@ -94,7 +97,7 @@ class BookDetailsViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        println("Resource.Error: ${result.message}")
+                        SnackbarManager.showMessage(UiText.DynamicString(result.message))
                     }
                 }
             }
@@ -112,7 +115,6 @@ class BookDetailsViewModel @Inject constructor(
     }
 
     sealed class BookDetailsUiEvent {
-        data class ShowError(val message: String) : BookDetailsUiEvent()
         data class NavigateToBookDetails(val id: String) : BookDetailsUiEvent()
         data class NavigateToReadScreen(val url: String) : BookDetailsUiEvent()
         data object OnBackPress : BookDetailsUiEvent()

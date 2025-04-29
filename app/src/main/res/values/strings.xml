@@ -67,4 +67,7 @@
     <string name="get_started">Get Started</string>
     <string name="next">Next</string>
     <string name="skip">Skip</string>
+    <string name="invalid_password">Invalid Password!</string>
+    <string name="invalid_email">Invalid Email!</string>
+    <string name="password_doesn_t_match">Password doesn\'t match!</string>
 </resources>

@@ -51,7 +51,6 @@ fun BookShelfScreenRoute(
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is BookShelfUiEvent.NavigateToSavedBookScreen -> onNavigateToSavedBookScreen(event.books)
-                is BookShelfUiEvent.ShowError -> {}
             }
         }
     }
@@ -100,15 +99,14 @@ fun BookShelfScreen(
                     )
                 }
             )
-            Spacer(Modifier.height(40.dp))
-            Text(
-                text = "Statistics",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
             if (state.favoriteBooks.isNotEmpty() || state.readingBooks.isNotEmpty()) {
+                Spacer(Modifier.height(40.dp))
+                Text(
+                    text = "Statistics",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
                 Spacer(Modifier.height(8.dp))
-
                 RotatingCirclePieChart(books = state.favoriteBooks + state.readingBooks)
             }
         }

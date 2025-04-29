@@ -126,7 +126,7 @@ fun RatingBarInput(
         for (index in 1..stars) {
             Icon(
                 imageVector = Icons.Outlined.Star,
-                contentDescription = "Rate $index",
+                contentDescription = null,
                 tint = if (index <= selectedRating) selectedColor else unselectedColor,
                 modifier = Modifier
                     .size(starSize)

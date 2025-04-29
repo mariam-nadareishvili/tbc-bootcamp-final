@@ -58,7 +58,6 @@ fun ReviewScreenRoute(
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is ReviewViewModel.ReviewUiEvent.OnBackPress -> onBackPress()
-                is ReviewViewModel.ReviewUiEvent.ShowError -> TODO()
             }
         }
     }

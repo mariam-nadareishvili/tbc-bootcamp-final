@@ -7,12 +7,15 @@ import androidx.paging.map
 import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.useCase.GetFeedBooksUseCase
 import com.tbc.bookli.domain.useCase.GetStoriesUseCase
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import com.tbc.bookli.presentation.mapper.toPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -28,69 +31,77 @@ class HomeViewModel @Inject constructor(
     private val getStoriesUseCase: GetStoriesUseCase
 ) : ViewModel() {
 
-    private val _homeState = MutableStateFlow(HomeUiState())
-    val homeState get() = _homeState.asStateFlow()
+    private val _state = MutableStateFlow(HomeUiState())
+    val state = _state.asStateFlow()
 
-    private val _homeUiEvents = MutableSharedFlow<HomeUiEvents>()
-    val homeUiEvents: SharedFlow<HomeUiEvents> = _homeUiEvents
+    private val _uiEvent = MutableSharedFlow<HomeUiEvent>()
+    val uiEvent: SharedFlow<HomeUiEvent> = _uiEvent.asSharedFlow()
 
     init {
-        fetchBooks()
-        getStories()
+        onEvent(HomeEvent.LoadFeedBooks)
+        onEvent(HomeEvent.LoadStories)
     }
 
-    private fun fetchBooks() {
+    fun onEvent(event: HomeEvent) {
+        when (event) {
+            is HomeEvent.LoadFeedBooks -> loadFeedBooks()
+            is HomeEvent.LoadStories -> loadStories()
+            is HomeEvent.BookClicked -> navigateToBookDetails(event.id)
+        }
+    }
+
+    private fun loadFeedBooks() {
         viewModelScope.launch(Dispatchers.IO) {
             getFeedBooksUseCase()
                 .cachedIn(viewModelScope)
                 .onStart {
-                    _homeState.update {
-                        it.copy(isLoading = true)
-                    }
+                    _state.update { it.copy(isLoading = true) }
                 }
-                .catch { result ->
-                    _homeState.update { it.copy(isLoading = false) }
-                    _homeUiEvents.emit(
-                        HomeUiEvents.ShowError(
-                            message = result.message ?: "General error"
-                        )
+                .catch { e ->
+                    _state.update { it.copy(isLoading = false) }
+                    SnackbarManager.showMessage(
+                        UiText.DynamicString(e.message ?: "Something went wrong")
                     )
                 }
                 .collect { pagingData ->
-                    _homeState.update {
-                        it.copy(feedBookList = flowOf(pagingData.map { it.toPresentation() }))
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            feedBookList = flowOf(pagingData.map { it.toPresentation() })
+                        )
                     }
                 }
         }
     }
 
-    private fun getStories() {
+    private fun loadStories() {
         viewModelScope.launch(Dispatchers.IO) {
             getStoriesUseCase()
                 .collectLatest { result ->
                     when (result) {
-                        is Resource.Loading -> _homeState.update { it.copy(isLoading = result.isLoading) }
-                        is Resource.Success -> _homeState.update {
+                        is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
+
+                        is Resource.Success -> _state.update {
                             it.copy(
                                 storyList = result.data?.map { it.toPresentation() } ?: emptyList()
                             )
                         }
 
-                        is Resource.Error -> _homeUiEvents.emit(HomeUiEvents.ShowError(message = result.message))
+                        is Resource.Error -> SnackbarManager.showMessage(
+                            UiText.DynamicString(result.message)
+                        )
                     }
                 }
         }
     }
 
-    fun navigateToBookDetails(bookId: String) {
+    private fun navigateToBookDetails(bookId: String) {
         viewModelScope.launch {
-            _homeUiEvents.emit(HomeUiEvents.NavigateToBookDetails(id = bookId))
+            _uiEvent.emit(HomeUiEvent.NavigateToBookDetails(bookId))
         }
     }
 
-
-    sealed class HomeUiEvents {
-        data class ShowError(val message: String) : HomeUiEvents()
-        data class NavigateToBookDetails(val id :String) : HomeUiEvents()
+    sealed class HomeUiEvent {
+        data class NavigateToBookDetails(val id: String) : HomeUiEvent()
     }
 }

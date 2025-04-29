@@ -3,9 +3,14 @@ package com.tbc.bookli.presentation.screen.review
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tbc.bookli.common.Resource
+import com.tbc.bookli.domain.useCase.GetUserUserInfoCase
 import com.tbc.bookli.domain.useCase.UpdateBookByIdUseCase
 import com.tbc.bookli.presentation.helper.DateHelper.getCurrentDateFormatted
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import com.tbc.bookli.presentation.mapper.toDomain
+import com.tbc.bookli.presentation.mapper.toPresentation
+import com.tbc.bookli.presentation.screen.AvatarType
 import com.tbc.bookli.presentation.screen.search.ReviewUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
-    private val updateBookByIdUseCase: UpdateBookByIdUseCase
+    private val updateBookByIdUseCase: UpdateBookByIdUseCase,
+    private val getUserInfoUseCase: GetUserUserInfoCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReviewUiState())
@@ -35,6 +41,7 @@ class ReviewViewModel @Inject constructor(
                 _state.update {
                     it.copy(bookUi = event.book)
                 }
+                fetchUserInfo()
             }
 
             is ReviewScreenEvent.UpdateRating -> {
@@ -64,15 +71,15 @@ class ReviewViewModel @Inject constructor(
             val currentBook = currentState.bookUi ?: return
 
             val newReview = ReviewUi(
-                reviewerName = "Mariam Test", // TODO: Replace with actual user
+                reviewerName = _state.value.userInfo?.fullName ?: "",
                 date = getCurrentDateFormatted(),
                 comment = currentState.review,
                 rating = currentState.rating.toDouble(),
-                avatar = "cool" // TODO: Replace with actual avatar
+                avatar = _state.value.userInfo?.avatar?.key ?: AvatarType.RABBIT.key
             )
 
             val updatedBook = currentBook.copy(
-                reviews = currentBook.reviews + newReview
+                reviews = listOf(newReview) + currentBook.reviews
             )
 
             currentState.copy(bookUi = updatedBook)
@@ -90,8 +97,20 @@ class ReviewViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        println("Resource.Error: ${result.message}")
+                        SnackbarManager.showMessage(UiText.DynamicString(result.message))
                     }
+                }
+            }
+        }
+    }
+
+    private fun fetchUserInfo() {
+        viewModelScope.launch(Dispatchers.IO) {
+            getUserInfoUseCase(_state.value.userId).collect { result ->
+                when (result) {
+                    is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
+                    is Resource.Success -> _state.update { it.copy(userInfo = result.data?.toPresentation()) }
+                    is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
                 }
             }
         }
@@ -104,7 +123,6 @@ class ReviewViewModel @Inject constructor(
     }
 
     sealed class ReviewUiEvent {
-        data class ShowError(val message: String) : ReviewUiEvent()
         data object OnBackPress : ReviewUiEvent()
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,59 +41,36 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tbc.bookli.R
-import com.tbc.bookli.presentation.login.LoginViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun LoginScreenRoute(
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel(),
-    snackbarHostState: SnackbarHostState,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val state by viewModel.loginState.collectAsStateWithLifecycle()
 
     LoginScreen(
         state = state,
-        onLogin = viewModel::login,
-        onNavigateToRegister = viewModel::navigateToRegister,
-        onEmailChange = viewModel::updateEmail,
-        onPasswordChange = viewModel::updatePassword,
-        onRememberMeChange = viewModel::updateRememberMe,
-        onTogglePasswordVisibility = viewModel::togglePasswordVisibility
+        onEvent = viewModel::onEvent
     )
 
     LaunchedEffect(Unit) {
-
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
-                is LoginUiEvents.ShowError -> {
-                    snackbarHostState.showSnackbar(event.message)
-                }
-
-                is LoginUiEvents.NavigateToHomeScreen -> {
-                    onNavigateToHome()
-                }
-
-                is LoginUiEvents.NavigateToRegister -> {
-                    onNavigateToRegister()
-                }
-
+                LoginUiEvents.NavigateToHomeScreen -> onNavigateToHome()
+                LoginUiEvents.NavigateToRegister -> onNavigateToRegister()
             }
         }
     }
-
 }
+
 
 @Composable
 fun LoginScreen(
     state: LoginUiState,
-    onLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onRememberMeChange: (Boolean) -> Unit,
-    onTogglePasswordVisibility: () -> Unit,
+    onEvent: (LoginEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -112,9 +88,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(40.dp))
         TextField(
             value = state.email,
-            onValueChange = { newEmail ->
-                onEmailChange(newEmail)
-            },
+            onValueChange = { onEvent(LoginEvent.EmailChanged(it)) },
             placeholder = {
                 Text(
                     modifier = Modifier.padding(top = 2.dp),
@@ -150,7 +124,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(40.dp))
         TextField(
             value = state.password,
-            onValueChange = { newPassword -> onPasswordChange(newPassword) },
+            onValueChange = { onEvent(LoginEvent.PasswordChanged(it)) },
             placeholder = {
                 Text(
                     text = stringResource(R.string.password),
@@ -192,7 +166,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .padding(end = 10.dp)
                         .size(26.dp)
-                        .clickable { onTogglePasswordVisibility() },
+                        .clickable { onEvent(LoginEvent.TogglePasswordVisibility) },
                     tint = colorResource(R.color.black).copy(alpha = 0.7f)
                 )
             }
@@ -204,7 +178,7 @@ fun LoginScreen(
             ) {
             Checkbox(
                 checked = state.isRememberMeChecked,
-                onCheckedChange = { isChecked -> onRememberMeChange(isChecked) },
+                onCheckedChange = { onEvent(LoginEvent.RememberMeChanged(it)) },
                 enabled = true
             )
             Text(
@@ -215,7 +189,7 @@ fun LoginScreen(
         }
         Spacer(modifier = Modifier.height(30.dp))
         Button(
-            onClick = { onLogin() },
+            onClick = { onEvent(LoginEvent.Login) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 30.dp)
@@ -246,23 +220,19 @@ fun LoginScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(start = 5.dp)
-                    .clickable { onNavigateToRegister() },
+                    .clickable { onEvent(LoginEvent.NavigateToRegister) },
                 color = colorResource(R.color.sky_blue).copy(alpha = 2f)
             )
         }
 
     }
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(state = LoginUiState(),
-        onLogin = {},
-        onNavigateToRegister = {},
-        onEmailChange = {},
-        onPasswordChange = {},
-        onRememberMeChange = {},
-        onTogglePasswordVisibility = {})
+    LoginScreen(
+        state = LoginUiState(),
+        onEvent = {}
+    )
 }

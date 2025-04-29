@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.model.BookStatus
 import com.tbc.bookli.domain.useCase.FilterFavoriteBooksUseCase
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import com.tbc.bookli.presentation.mapper.toPresentation
 import com.tbc.bookli.presentation.screen.search.BookUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,7 +56,7 @@ class BookShelfViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        println("error happended: ${result.message}")
+                        SnackbarManager.showMessage(UiText.DynamicString(result.message))
                     }
                 }
             }
@@ -76,7 +78,6 @@ class BookShelfViewModel @Inject constructor(
     }
 
     sealed class BookShelfUiEvent {
-        data class ShowError(val message: String) : BookShelfUiEvent()
         data class NavigateToSavedBookScreen(val books: List<BookUi>) : BookShelfUiEvent()
     }
 }

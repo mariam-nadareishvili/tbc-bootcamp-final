@@ -2,18 +2,21 @@ package com.tbc.bookli.presentation.screen.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tbc.bookli.R
 import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.model.User
 import com.tbc.bookli.domain.useCase.EmailValidationUseCase
 import com.tbc.bookli.domain.useCase.PasswordValidationUseCase
 import com.tbc.bookli.domain.useCase.RegisterUseCase
 import com.tbc.bookli.domain.useCase.UpdateUserInfoUseCase
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import com.tbc.bookli.presentation.screen.AvatarType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,121 +30,114 @@ class RegisterViewModel @Inject constructor(
     private val updateUserUseCase: UpdateUserInfoUseCase
 ) : ViewModel() {
 
-    private val _registerState =
-        MutableStateFlow(RegisterUiState())
-    val registerState get() = _registerState.asStateFlow()
+    private val _state = MutableStateFlow(RegisterUiState())
+    val state = _state.asStateFlow()
 
-    private val _uiEvents = MutableSharedFlow<RegisterUiEvents>()
-    val uiEvents: SharedFlow<RegisterUiEvents> = _uiEvents
+    private val _uiEvents = MutableSharedFlow<RegisterUiEvent>()
+    val uiEvents = _uiEvents.asSharedFlow()
 
-    fun register() {
+    fun onEvent(event: RegisterEvent) {
+        when (event) {
+            is RegisterEvent.EmailChanged -> {
+                _state.update { it.copy(email = event.email) }
+            }
+
+            is RegisterEvent.FullNameChanged -> {
+                _state.update { it.copy(fullName = event.fullName) }
+            }
+
+            is RegisterEvent.PasswordChanged -> {
+                _state.update {
+                    it.copy(
+                        password = event.password,
+                        isPasswordSame = event.password == it.repeatPassword
+                    )
+                }
+            }
+
+            is RegisterEvent.RepeatPasswordChanged -> {
+                _state.update {
+                    it.copy(
+                        repeatPassword = event.repeatPassword,
+                        isPasswordSame = event.repeatPassword == it.password
+                    )
+                }
+            }
+
+            RegisterEvent.TogglePasswordVisibility -> {
+                _state.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+            }
+
+            RegisterEvent.ToggleRepeatPasswordVisibility -> {
+                _state.update { it.copy(isRepeatPasswordVisible = !it.isRepeatPasswordVisible) }
+            }
+
+            RegisterEvent.SubmitRegister -> {
+                performRegister()
+            }
+
+            RegisterEvent.NavigateBack -> {
+                viewModelScope.launch {
+                    _uiEvents.emit(RegisterUiEvent.OnBackPress)
+                }
+            }
+        }
+    }
+
+    private fun performRegister() {
         viewModelScope.launch(Dispatchers.IO) {
+            val currentState = _state.value
+
             when {
-                !emailValidationUseCase(email = registerState.value.email) -> {
-                    _uiEvents.emit(RegisterUiEvents.ShowError("Invalid email!"))
+                !emailValidationUseCase(currentState.email) -> {
+                    SnackbarManager.showMessage(UiText.StringResource(R.string.invalid_email))
                     return@launch
                 }
 
-                !passwordValidationUseCase(password = registerState.value.password) -> {
-                    _uiEvents.emit(RegisterUiEvents.ShowError("Invalid Password!"))
+                !passwordValidationUseCase(currentState.password) -> {
+                    SnackbarManager.showMessage(UiText.StringResource(R.string.invalid_password))
                     return@launch
                 }
 
-                registerState.value.repeatPassword != registerState.value.password -> {
-                    _uiEvents.emit(RegisterUiEvents.ShowError("Password doesn't match!"))
+                currentState.repeatPassword != currentState.password -> {
+                    SnackbarManager.showMessage(UiText.StringResource(R.string.password_doesn_t_match))
                     return@launch
                 }
             }
 
-            registerUseCase(
-                email = registerState.value.email,
-                password = registerState.value.password
-            ).collect { result ->
+            registerUseCase(currentState.email, currentState.password).collect { result ->
                 when (result) {
-                    is Resource.Error -> _uiEvents.emit(RegisterUiEvents.ShowError(message = result.message))
-                    is Resource.Loading -> _registerState.update {
-                        it.copy(isLoading = result.isLoading)
-                    }
+                    is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
 
-                    is Resource.Success -> {
-                        updateUserInfo()
-                    }
+                    is Resource.Success -> updateUserInfo()
+
+                    is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
                 }
             }
         }
     }
 
     private suspend fun updateUserInfo() {
-        val userId = "ae9aff30-a102-4e36-bfc3-70d0a87efde9" // hardcoded id due to api restrictions
-        updateUserUseCase.invoke(
+        updateUserUseCase(
             User(
-                id = userId,
-                fullName = registerState.value.fullName,
-                email = registerState.value.email,
+                id = _state.value.userId,
+                fullName = _state.value.fullName,
+                email = _state.value.email,
                 avatar = AvatarType.RABBIT.key
             )
         ).collect { result ->
             when (result) {
-                is Resource.Error -> {
-                    println("Error: ${result.message}")
-                }
+                is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
 
-                is Resource.Loading -> _registerState.update {
-                    it.copy(isLoading = result.isLoading)
-                }
+                is Resource.Success -> _uiEvents.emit(RegisterUiEvent.NavigateBackToLogin)
 
-                is Resource.Success -> {
-                    _uiEvents.emit(RegisterUiEvents.NavigateBackToLogin)
-                }
+                is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
             }
         }
     }
 
-    fun updateEmail(newEmail: String) {
-        _registerState.update { it.copy(email = newEmail) }
-    }
-
-    fun updateFullName(newFullName: String) {
-        _registerState.update { it.copy(fullName = newFullName) }
-    }
-
-    fun updatePassword(newPassword: String) {
-        _registerState.update {
-            it.copy(
-                password = newPassword,
-                isPasswordSame = newPassword == it.repeatPassword
-            )
-        }
-    }
-
-    fun updateRepeatPassword(newRepeatPassword: String) {
-        _registerState.update {
-            it.copy(
-                repeatPassword = newRepeatPassword,
-                isPasswordSame = newRepeatPassword == it.password
-            )
-        }
-    }
-
-    fun togglePasswordVisibility() {
-        _registerState.update {
-            it.copy(
-                isPasswordVisible = !_registerState.value.isPasswordVisible
-            )
-        }
-    }
-
-    fun toggleRepeatPasswordVisibility() {
-        _registerState.update {
-            it.copy(
-                isRepeatPasswordVisible = !_registerState.value.isRepeatPasswordVisible
-            )
-        }
-    }
-
-    fun navigateWithBackIcon() {
-        viewModelScope.launch {
-            _uiEvents.emit(RegisterUiEvents.OnBackPress)
-        }
+    sealed class RegisterUiEvent {
+        data object NavigateBackToLogin : RegisterUiEvent()
+        data object OnBackPress : RegisterUiEvent()
     }
 }

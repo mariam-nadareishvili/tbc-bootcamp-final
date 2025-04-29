@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tbc.bookli.R
+import com.tbc.bookli.presentation.screen.register.RegisterViewModel.RegisterUiEvent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -47,29 +47,19 @@ fun RegisterScreenRoute(
     onBackPress: () -> Unit,
     onNavigateBackToLogin: () -> Unit,
     viewModel: RegisterViewModel = hiltViewModel(),
-    snackbarHostState: SnackbarHostState,
 ) {
-    val state by viewModel.registerState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     RegisterScreen(
         state = state,
-        onRegister = viewModel::register,
-        onEmailChange = viewModel::updateEmail,
-        onPasswordChange = viewModel::updatePassword,
-        onRepeatPasswordChange = viewModel::updateRepeatPassword,
-        onTogglePasswordVisibility = viewModel::togglePasswordVisibility,
-        onBackPress = viewModel::navigateWithBackIcon,
-        onToggleRepeatPasswordVisibility = viewModel::toggleRepeatPasswordVisibility,
-        onFullNameChange = viewModel::updateFullName
+        onEvent = viewModel::onEvent
     )
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
-                RegisterUiEvents.NavigateBackToLogin -> onNavigateBackToLogin()
-                RegisterUiEvents.OnBackPress -> onBackPress()
-                is RegisterUiEvents.ShowError ->
-                    snackbarHostState.showSnackbar(event.message)
+                RegisterUiEvent.NavigateBackToLogin -> onNavigateBackToLogin()
+                RegisterUiEvent.OnBackPress -> onBackPress()
             }
         }
     }
@@ -79,14 +69,7 @@ fun RegisterScreenRoute(
 @Composable
 fun RegisterScreen(
     state: RegisterUiState,
-    onFullNameChange: (String) -> Unit,
-    onRegister: () -> Unit,
-    onEmailChange: (email: String) -> Unit,
-    onPasswordChange: (password: String) -> Unit,
-    onRepeatPasswordChange: (repeatPassword: String) -> Unit,
-    onTogglePasswordVisibility: () -> Unit,
-    onBackPress: () -> Unit,
-    onToggleRepeatPasswordVisibility: () -> Unit
+    onEvent: (RegisterEvent) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -97,7 +80,7 @@ fun RegisterScreen(
             contentDescription = null,
             modifier = Modifier
                 .padding(start = 16.dp, top = 16.dp)
-                .clickable { onBackPress() },
+                .clickable { onEvent(RegisterEvent.NavigateBack) },
             tint = Color.DarkGray
         )
         Column(
@@ -119,7 +102,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(70.dp))
             TextField(
                 value = state.fullName,
-                onValueChange = { newFullName -> onFullNameChange(newFullName) },
+                onValueChange = { onEvent(RegisterEvent.FullNameChanged(it)) },
                 placeholder = {
                     Text(
                         stringResource(R.string.full_name),
@@ -157,7 +140,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(20.dp))
             TextField(
                 value = state.email,
-                onValueChange = { newEmail -> onEmailChange(newEmail) },
+                onValueChange = { onEvent(RegisterEvent.EmailChanged(it)) },
                 placeholder = {
                     Text(
                         stringResource(R.string.email),
@@ -195,7 +178,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(20.dp))
             TextField(
                 value = state.password,
-                onValueChange = { newPassword -> onPasswordChange(newPassword) },
+                onValueChange = { onEvent(RegisterEvent.PasswordChanged(it)) },
                 placeholder = {
                     Text(
                         stringResource(R.string.password),
@@ -235,7 +218,7 @@ fun RegisterScreen(
                         modifier = Modifier
                             .padding(end = 10.dp)
                             .size(26.dp)
-                            .clickable { onTogglePasswordVisibility() },
+                            .clickable { onEvent(RegisterEvent.TogglePasswordVisibility) },
                         tint = colorResource(R.color.black).copy(alpha = 0.7f)
                     )
                 }
@@ -244,7 +227,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(20.dp))
             TextField(
                 value = state.repeatPassword,
-                onValueChange = { newRepeatedPassword -> onRepeatPasswordChange(newRepeatedPassword) },
+                onValueChange = { onEvent(RegisterEvent.RepeatPasswordChanged(it)) },
                 placeholder = {
                     Text(
                         stringResource(R.string.confirm_password),
@@ -284,14 +267,14 @@ fun RegisterScreen(
                         modifier = Modifier
                             .padding(end = 10.dp)
                             .size(26.dp)
-                            .clickable { onToggleRepeatPasswordVisibility() },
+                            .clickable { onEvent(RegisterEvent.ToggleRepeatPasswordVisibility) },
                         tint = colorResource(R.color.black).copy(alpha = 0.7f)
                     )
                 }
             )
             Spacer(modifier = Modifier.height(80.dp))
             Button(
-                onClick = { onRegister() },
+                onClick = { onEvent(RegisterEvent.SubmitRegister) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 30.dp)
@@ -314,13 +297,8 @@ fun RegisterScreen(
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(state = RegisterUiState(),
-        onFullNameChange = {},
-        onRegister = {},
-        onEmailChange = {},
-        onPasswordChange = {},
-        onRepeatPasswordChange = {},
-        onTogglePasswordVisibility = {},
-        onBackPress = {},
-        onToggleRepeatPasswordVisibility = {})
+    RegisterScreen(
+        state = RegisterUiState(),
+        onEvent = {}
+    )
 }

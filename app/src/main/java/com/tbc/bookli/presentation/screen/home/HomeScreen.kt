@@ -38,7 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.tbc.bookli.presentation.screen.home.HomeViewModel.HomeUiEvents
+import com.tbc.bookli.presentation.screen.home.HomeViewModel.HomeUiEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 
@@ -48,7 +48,7 @@ fun HomeScreenRoute(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToBookDetails: (String) -> Unit
 ) {
-    val homeUiState by viewModel.homeState.collectAsStateWithLifecycle()
+    val homeUiState by viewModel.state.collectAsStateWithLifecycle()
     val feedBookPagingItems = homeUiState.feedBookList.collectAsLazyPagingItems()
     val pagerState = rememberPagerState(pageCount = { homeUiState.storyList.size })
 
@@ -61,10 +61,9 @@ fun HomeScreenRoute(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.homeUiEvents.collectLatest { event ->
+        viewModel.uiEvent.collectLatest { event ->
             when (event) {
-                is HomeUiEvents.NavigateToBookDetails -> onNavigateToBookDetails(event.id)
-                is HomeUiEvents.ShowError -> {}
+                is HomeUiEvent.NavigateToBookDetails -> onNavigateToBookDetails(event.id)
             }
         }
     }
@@ -73,7 +72,7 @@ fun HomeScreenRoute(
         state = homeUiState,
         feedBookPaging = feedBookPagingItems,
         pagerState = pagerState,
-        onNavigateToBookDetails = viewModel::navigateToBookDetails
+        onEvent = viewModel::onEvent
     )
 }
 
@@ -82,14 +81,13 @@ fun HomeScreen(
     state: HomeUiState,
     feedBookPaging: LazyPagingItems<FeedBookUi>,
     pagerState: PagerState,
-    onNavigateToBookDetails: (String) -> Unit
+    onEvent: (HomeEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Modern background
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // Stories Section (Carousel)
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -103,13 +101,12 @@ fun HomeScreen(
                 story = state.storyList[page],
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { onNavigateToBookDetails(state.storyList[page].id) }
+                    .clickable { onEvent(HomeEvent.BookClicked(state.storyList[page].id)) }
             )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Pager Indicators
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,7 +129,6 @@ fun HomeScreen(
             }
         }
 
-        // Books Section (Grid)
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(16.dp),
@@ -145,7 +141,7 @@ fun HomeScreen(
                         imageUrl = feedBook.imageUrl,
                         title = feedBook.title,
                         modifier = Modifier
-                            .clickable { onNavigateToBookDetails(feedBook.id) },
+                            .clickable { onEvent(HomeEvent.BookClicked(feedBook.id)) },
                         rating = feedBook.rating
                     )
                 }
@@ -162,7 +158,7 @@ fun StoryItem(story: StoryUi, modifier: Modifier = Modifier) {
     ) {
         AsyncImage(
             model = story.imageUrl,
-            contentDescription = "Story Image",
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
@@ -201,7 +197,7 @@ fun BookItem(
     ) {
         AsyncImage(
             model = imageUrl,
-            contentDescription = "Book Cover",
+            contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(220.dp)

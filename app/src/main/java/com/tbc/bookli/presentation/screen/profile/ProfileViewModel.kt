@@ -10,6 +10,8 @@ import com.tbc.bookli.domain.useCase.GetUserUserInfoCase
 import com.tbc.bookli.domain.useCase.SetDarkModeUseCase
 import com.tbc.bookli.domain.useCase.UpdateLanguageUseCase
 import com.tbc.bookli.domain.useCase.UpdateUserInfoUseCase
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import com.tbc.bookli.presentation.mapper.toDomain
 import com.tbc.bookli.presentation.mapper.toPresentation
 import com.tbc.bookli.presentation.screen.AvatarType
@@ -91,11 +93,11 @@ class ProfileViewModel @Inject constructor(
 
     private fun fetchUserInfo() {
         viewModelScope.launch(Dispatchers.IO) {
-            getUserInfoUseCase("ae9aff30-a102-4e36-bfc3-70d0a87efde9").collect { result ->
+            getUserInfoUseCase(_state.value.userId).collect { result ->
                 when (result) {
                     is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
                     is Resource.Success -> _state.update { it.copy(userInfo = result.data?.toPresentation()) }
-                    is Resource.Error -> println("User info error: ${result.message}")
+                    is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
                 }
             }
         }
@@ -110,7 +112,7 @@ class ProfileViewModel @Inject constructor(
                 when (result) {
                     is Resource.Loading -> _state.update { it.copy(isLoading = result.isLoading) }
                     is Resource.Success -> _state.update { it.copy(userInfo = updatedUser) }
-                    is Resource.Error -> println("Avatar update error: ${result.message}")
+                    is Resource.Error -> SnackbarManager.showMessage(UiText.DynamicString(result.message))
                 }
             }
         }

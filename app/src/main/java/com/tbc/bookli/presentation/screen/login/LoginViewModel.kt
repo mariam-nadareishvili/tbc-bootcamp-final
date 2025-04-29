@@ -1,18 +1,19 @@
-package com.tbc.bookli.presentation.login
+package com.tbc.bookli.presentation.screen.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tbc.bookli.R
 import com.tbc.bookli.common.Resource
 import com.tbc.bookli.domain.useCase.EmailValidationUseCase
 import com.tbc.bookli.domain.useCase.LoginUseCase
 import com.tbc.bookli.domain.useCase.PasswordValidationUseCase
-import com.tbc.bookli.presentation.screen.login.LoginUiEvents
-import com.tbc.bookli.presentation.screen.login.LoginUiState
+import com.tbc.bookli.presentation.helper.SnackbarManager
+import com.tbc.bookli.presentation.helper.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,66 +27,75 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow(LoginUiState())
-    val loginState get() = _loginState.asStateFlow()
+    val loginState = _loginState.asStateFlow()
 
     private val _uiEvents = MutableSharedFlow<LoginUiEvents>()
-    val uiEvents: SharedFlow<LoginUiEvents> = _uiEvents
+    val uiEvents = _uiEvents.asSharedFlow()
 
+    fun onEvent(event: LoginEvent) {
+        when (event) {
+            is LoginEvent.EmailChanged -> {
+                _loginState.update { it.copy(email = event.email) }
+            }
 
-    fun login() {
+            is LoginEvent.PasswordChanged -> {
+                _loginState.update { it.copy(password = event.password) }
+            }
+
+            is LoginEvent.RememberMeChanged -> {
+                _loginState.update { it.copy(isRememberMeChecked = event.checked) }
+            }
+
+            is LoginEvent.TogglePasswordVisibility -> {
+                _loginState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+            }
+
+            is LoginEvent.Login -> {
+                performLogin()
+            }
+
+            is LoginEvent.NavigateToRegister -> {
+                viewModelScope.launch {
+                    _uiEvents.emit(LoginUiEvents.NavigateToRegister)
+                }
+            }
+        }
+    }
+
+    private fun performLogin() {
         viewModelScope.launch(Dispatchers.IO) {
-            when {
-                !emailValidationUseCase(loginState.value.email) -> {
-                    _uiEvents.emit(LoginUiEvents.ShowError("Invalid Email!"))
-                    return@launch
-                }
-
-                !passwordValidationUseCase(loginState.value.password) -> {
-                    _uiEvents.emit(LoginUiEvents.ShowError("Invalid Password!"))
-                    return@launch
-                }
+            val state = _loginState.value
+            if (!emailValidationUseCase(state.email)) {
+                SnackbarManager.showMessage(UiText.StringResource(R.string.invalid_email))
+                return@launch
+            }
+            if (!passwordValidationUseCase(state.password)) {
+                SnackbarManager.showMessage(UiText.StringResource(R.string.invalid_password))
+                return@launch
             }
 
             loginUseCase(
-                email = loginState.value.email,
-                password = loginState.value.password,
-                isRememberedMeChecked = loginState.value.isRememberMeChecked
+                email = state.email,
+                password = state.password,
+                isRememberedMeChecked = state.isRememberMeChecked
             ).collect { result ->
                 when (result) {
-                    is Resource.Error -> {
-                        _uiEvents.emit(LoginUiEvents.ShowError(message = result.message))
-                    }
                     is Resource.Loading -> _loginState.update { it.copy(isLoading = result.isLoading) }
+
                     is Resource.Success -> {
-                        _uiEvents.emit(
-                            LoginUiEvents.NavigateToHomeScreen
-                        )
+                        _uiEvents.emit(LoginUiEvents.NavigateToHomeScreen)
+                    }
+
+                    is Resource.Error -> {
+                        SnackbarManager.showMessage(UiText.DynamicString(result.message))
                     }
                 }
             }
         }
     }
+}
 
-    fun updateEmail(email: String) {
-        _loginState.update { it.copy(email = email) }
-    }
-
-    fun updatePassword(password: String) {
-        _loginState.update { it.copy(password = password) }
-    }
-
-    fun updateRememberMe(isChecked: Boolean) {
-        _loginState.update { it.copy(isRememberMeChecked = isChecked) }
-    }
-
-    fun togglePasswordVisibility() {
-        _loginState.update { it.copy(isPasswordVisible = !_loginState.value.isPasswordVisible) }
-    }
-
-    fun navigateToRegister() {
-        viewModelScope.launch {
-            _uiEvents.emit(LoginUiEvents.NavigateToRegister)
-        }
-    }
-
+sealed class LoginUiEvents {
+    data object NavigateToHomeScreen : LoginUiEvents()
+    data object NavigateToRegister : LoginUiEvents()
 }
