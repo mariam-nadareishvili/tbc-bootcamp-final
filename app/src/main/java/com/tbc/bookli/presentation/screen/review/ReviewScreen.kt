@@ -1,7 +1,8 @@
-package com.tbc.bookli.presentation.screen.details
+package com.tbc.bookli.presentation.screen.review
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,16 +34,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tbc.bookli.R
+import com.tbc.bookli.presentation.navigation.ReviewScreen
+import com.tbc.bookli.presentation.screen.details.ItemGenres
 import com.tbc.bookli.presentation.screen.home.RatingBar
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun ReviewScreenRoute() {
+fun ReviewScreenRoute(
+    viewModel: ReviewViewModel = hiltViewModel(),
+    onBackPress: () -> Unit
+) {
 
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collectLatest { event ->
+            when (event) {
+                is ReviewViewModel.ReviewUiEvent.OnBackPress -> onBackPress()
+                is ReviewViewModel.ReviewUiEvent.ShowError -> TODO()
+            }
+        }
+    }
+    ReviewScreen(
+        state = state,
+        onBackPress = viewModel::navigateBack
+    )
 }
 
 @Composable
-fun ReviewScreen() {
+fun ReviewScreen(
+    state: ReviewUiState,
+    onBackPress: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,7 +76,8 @@ fun ReviewScreen() {
             painter = painterResource(R.drawable.ic_back),
             contentDescription = null,
             modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 10.dp),
+                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .clickable { onBackPress() },
             tint = colorResource(R.color.sky_blue)
         )
         Row(
@@ -161,5 +189,5 @@ fun ReviewScreen() {
 @Preview(showBackground = true)
 @Composable
 fun ReviewScreenPreview() {
-    ReviewScreen()
+    ReviewScreen(onBackPress = {}, state = ReviewUiState(isLoading = false))
 }

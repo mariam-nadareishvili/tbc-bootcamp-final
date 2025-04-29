@@ -29,15 +29,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.tbc.bookli.presentation.screen.bookshelf.BookShelfScreenRoute
 import com.tbc.bookli.presentation.screen.bottom_sheet.BottomSheetHost
 import com.tbc.bookli.presentation.screen.bottom_sheet.rememberBottomSheetController
 import com.tbc.bookli.presentation.screen.details.BookDetailsRoute
+import com.tbc.bookli.presentation.screen.review.ReviewScreen
 import com.tbc.bookli.presentation.screen.home.HomeScreenRoute
 import com.tbc.bookli.presentation.screen.introduction.IntroductionScreen
 import com.tbc.bookli.presentation.screen.login.LoginScreenRoute
 import com.tbc.bookli.presentation.screen.profile.ProfileScreenRoute
 import com.tbc.bookli.presentation.screen.read.ReadScreen
 import com.tbc.bookli.presentation.screen.register.RegisterScreenRoute
+import com.tbc.bookli.presentation.screen.review.ReviewScreenRoute
+import com.tbc.bookli.presentation.screen.review.ReviewUiState
+import com.tbc.bookli.presentation.screen.savedBooksScreen.SavedBooksScreen
 import com.tbc.bookli.presentation.screen.search.SearchScreenRoute
 
 @Composable
@@ -155,7 +160,8 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                             navController.navigate(Read(url = url))
                         },
                         onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) },
-                        onBackPress = { navController.navigateUp() }
+                        onBackPress = { navController.navigateUp() },
+                        onNavigateToReviewScreen = { navController.navigate(ReviewScreen) }
                     )
                 }
 
@@ -165,7 +171,24 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
                     ReadScreen(url = args.url)
                 }
 
-                composable<BookShelfScreen> { }
+                composable<BookShelfScreen> {
+                    BookShelfScreenRoute(onNavigateToSavedBookScreen = {
+                        navController.navigate(
+                            SavedBooksScreen
+                        )
+                    })
+
+                }
+                composable<SavedBooksScreen> {
+                    SavedBooksScreen()
+
+                }
+
+                composable<ReviewScreen> {
+                    ReviewScreenRoute(onBackPress = { navController.navigateUp() }
+                    )
+
+                }
                 composable<SearchScreen> {
                     SearchScreenRoute(
                         onNavigateToBookDetails = { id -> navController.navigate(BookDetails(bookId = id)) }

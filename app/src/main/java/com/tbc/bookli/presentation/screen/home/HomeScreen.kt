@@ -140,7 +140,6 @@ fun HomeScreen(
                         imageUrl = it.imageUrl,
                         title = it.title,
                         rating = it.rating,
-                        averagePrice = it.averagePrice,
                     )
                 }
             }
@@ -180,10 +179,9 @@ fun BookItem(
     title: String,
     modifier: Modifier = Modifier,
     rating: Double? = null,
-    averagePrice: Double? = null,
     ratingAndPriceVisible: Boolean = true,
     starSize: Dp = 14.dp,
-    showRatingNumber: Boolean = false,
+    showRatingNumber: Boolean = true,
     author: String? = null
 ) {
     Column(
@@ -207,32 +205,17 @@ fun BookItem(
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(8.dp))
         if (ratingAndPriceVisible) {
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                rating?.let {
-                    RatingBar(
-                        rating = it,
-                        showRatingNumber = showRatingNumber,
-
-                        starSize = starSize
-                    )
-                }
-
-                averagePrice?.let {
-                    Text(
-                        text = "$$averagePrice",
-                        fontSize = 16.sp,
-                        fontWeight = Bold,
-                        modifier = Modifier.padding(end = 5.dp)
-                    )
-                }
+            rating?.let {
+                RatingBar(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    rating = it,
+                    showRatingNumber = showRatingNumber,
+                    starSize = starSize
+                )
             }
+
+
         }
     }
 }

@@ -76,7 +76,7 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
-    fun navigateWithBackIcon() {
+    fun navigateBack() {
         viewModelScope.launch {
             _uiEvents.emit(BookDetailsUiEvent.OnBackPress)
         }
@@ -88,10 +88,17 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
+    fun navigateToReviewScreen() {
+        viewModelScope.launch {
+            _uiEvents.emit(BookDetailsUiEvent.NavigateToReviewScreen)
+        }
+    }
+
     sealed class BookDetailsUiEvent {
         data class ShowError(val message: String) : BookDetailsUiEvent()
         data class NavigateToBookDetails(val id: String) : BookDetailsUiEvent()
         data class NavigateToReadScreen(val url: String) : BookDetailsUiEvent()
         data object OnBackPress : BookDetailsUiEvent()
+        data object NavigateToReviewScreen : BookDetailsUiEvent()
     }
 }

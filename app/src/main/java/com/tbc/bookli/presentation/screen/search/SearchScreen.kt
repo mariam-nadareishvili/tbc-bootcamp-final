@@ -127,7 +127,6 @@ fun SearchScreen(
                     author = book.author,
                     ratingAndPriceVisible = true,
                     rating = book.rating,
-                    averagePrice = book.averagePrice,
                     modifier = Modifier
                         .clickable { onNavigateToBookDetails(book.id) }
                 )

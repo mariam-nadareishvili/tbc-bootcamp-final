@@ -27,7 +27,14 @@ data object SearchScreen : Screen
 data object ProfileScreen : Screen
 
 @Serializable
+data object SavedBooksScreen : Screen
+
+@Serializable
+data object ReviewScreen : Screen
+
+@Serializable
 data class BookDetails(val bookId: String) : Screen
 
 @Serializable
 data class Read(val url: String) : Screen
+

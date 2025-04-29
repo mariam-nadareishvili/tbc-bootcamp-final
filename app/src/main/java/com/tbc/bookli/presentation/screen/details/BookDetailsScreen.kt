@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Visibility
@@ -68,7 +69,8 @@ fun BookDetailsRoute(
     onBackPress: () -> Unit,
     viewModel: BookDetailsViewModel = hiltViewModel(),
     onNavigateToReadScreen: (String) -> Unit,
-    onNavigateToBookDetails: (String) -> Unit
+    onNavigateToBookDetails: (String) -> Unit,
+    onNavigateToReviewScreen: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -84,7 +86,7 @@ fun BookDetailsRoute(
                 is BookDetailsUiEvent.ShowError -> {}
 
                 is BookDetailsUiEvent.OnBackPress -> onBackPress()
-   
+                is BookDetailsUiEvent.NavigateToReviewScreen -> onNavigateToReviewScreen()
             }
         }
 
@@ -92,8 +94,9 @@ fun BookDetailsRoute(
     BookDetailsScreen(
         state = state,
         onNavigateToReadScreen = viewModel::navigateToReadScreen,
-        onBackPress = viewModel::navigateWithBackIcon,
-        onNavigateToBookDetails = viewModel::navigateToBookDetails
+        onBackPress = viewModel::navigateBack,
+        onNavigateToBookDetails = viewModel::navigateToBookDetails,
+        onNavigateToReviewScreen = viewModel::navigateToReviewScreen
     )
 }
 
@@ -102,7 +105,8 @@ fun BookDetailsScreen(
     state: BookDetailsUiState,
     onNavigateToReadScreen: (String?) -> Unit,
     onBackPress: () -> Unit,
-    onNavigateToBookDetails: (String) -> Unit
+    onNavigateToBookDetails: (String) -> Unit,
+    onNavigateToReviewScreen: () -> Unit
 ) {
     var isFavorite by remember { mutableStateOf(false) }
 
@@ -317,7 +321,7 @@ fun BookDetailsScreen(
                 ExpandableText(text = it.aboutBook)
             }
 
-            Review()
+            Review(onNavigateToReviewScreen = onNavigateToReviewScreen)
 
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -398,7 +402,7 @@ fun ItemGenres(genre: String, modifier: Modifier = Modifier, selected: Boolean =
 
 
 @Composable
-fun Review() {
+fun Review(onNavigateToReviewScreen: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -406,16 +410,32 @@ fun Review() {
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
-
+        Row(
+            modifier = Modifier
+                .align(Alignment.End)
+                .clickable { onNavigateToReviewScreen() },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.Comment,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(4.dp)) // Small space between icon and text
+            Text(
+                text = "Leave your review",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
         Text(
             text = stringResource(R.string.reviews),
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
         val sampleComments = listOf(
             Triple("Nino", 4.5, "Beautifully written. I couldn't put it down."),
             Triple("Giorgi", 3.0, "Interesting story but a bit slow in the middle."),
@@ -437,11 +457,10 @@ fun ExpandableCommentsBox(
     minimizedMaxComments: Int = 3
 ) {
     var expanded by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(vertical = 20.dp)
             .animateContentSize()
     ) {
         val visibleComments = if (expanded) comments else comments.take(minimizedMaxComments)
@@ -608,12 +627,13 @@ fun SimilarBookItem(imageUrl: String, title: String, modifier: Modifier = Modifi
         )
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun BookDetailsPreview() {
-   BookDetailsScreen(state = BookDetailsUiState(
-       isLoading = false,
-       bookDetails = null,
-       similarBooks = listOf()
-   ), onNavigateToReadScreen = {}, onBackPress = {}) { }
+    BookDetailsScreen(state = BookDetailsUiState(
+        isLoading = false,
+        bookDetails = null,
+        similarBooks = listOf()
+    ), onNavigateToReadScreen = {}, onBackPress = {}, onNavigateToBookDetails = {}) { }
 }
