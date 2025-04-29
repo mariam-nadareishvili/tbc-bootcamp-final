@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,7 +67,11 @@ fun BookShelfScreen(
     state: BookShelfUiState,
     onEvent: (BookShelfEvent) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         Text(
             text = "Library",
             style = MaterialTheme.typography.headlineMedium,
@@ -85,9 +91,6 @@ fun BookShelfScreen(
                 }
             )
             Spacer(Modifier.height(8.dp))
-        }
-
-        Column {
             ReadingListItem(
                 books = state.readingBooks,
                 title = BookStatus.Reading.value,
@@ -97,7 +100,17 @@ fun BookShelfScreen(
                     )
                 }
             )
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(40.dp))
+            Text(
+                text = "Statistics",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            if (state.favoriteBooks.isNotEmpty() || state.readingBooks.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+
+                RotatingCirclePieChart(books = state.favoriteBooks + state.readingBooks)
+            }
         }
     }
 }

@@ -112,4 +112,6 @@ dependencies {
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.kotlinx.datetime)
+
+    implementation(libs.ycharts)
 }
