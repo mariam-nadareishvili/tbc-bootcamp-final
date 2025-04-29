@@ -55,6 +55,12 @@ class BookRepositoryImpl @Inject constructor(
         }.mapResource { it.map { it.toDomain() } }
     }
 
+    override fun getAllBooks(): Flow<Resource<List<Book>>> {
+        return safeApiCall {
+            apiService.getAllBooks()
+        }.mapResource { it.map { it.toDomain() } }
+    }
+
     override fun getBookById(id: String): Flow<Resource<Book>> {
         return safeApiCall {
             apiService.getBookById(id)

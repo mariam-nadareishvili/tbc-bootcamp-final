@@ -1,18 +1,32 @@
-@file:OptIn(ExperimentalLayoutApi::class)
+package com.tbc.bookli.presentation.screen.bookshelf_details
 
-package com.tbc.bookli.presentation.screen.savedBooksScreen
-
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,41 +35,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.tbc.bookli.R
+import coil.compose.AsyncImage
+import com.tbc.bookli.presentation.screen.search.BookUi
 
 @Composable
-fun SavedBooksScreen() {
-    val stories = listOf(
-        StoryItem(
-            title = "A and D",
-            views = "45,7M",
-            likes = "820K",
-            chapters = "52",
-            description = "Nerdy Dakota Evans makes the biggest mistake of her life by falling in love with...",
-            tags = listOf("teenfiction", "clique")
-        ),
-        StoryItem(
-            title = "Pregnant By The Alpha",
-            views = "2,49M",
-            likes = "63,1K",
-            chapters = "56",
-            description = "\"You are mine to kiss,\" Damian kisses me and runs his hands through my hair...",
-            tags = listOf("dark", "omega", "fantasy")
-        ),
-        StoryItem(
-            title = "Professional Restraint",
-            views = "1,51M",
-            likes = "37,5K",
-            chapters = "62",
-            description = "When a young data scientist unexpectedly steals the heart of a high...",
-            tags = listOf("hotencount", "workplace")
-        )
-    )
-
+fun BookShelfDetails(books: List<BookUi>, onNavigateToDetails: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -63,16 +49,15 @@ fun SavedBooksScreen() {
                 .height(150.dp)
                 .background(Color.LightGray)
         ) {
-            Image(
-                painter = painterResource(R.drawable.ic_man),
+            AsyncImage(
+                model = books.first().imageUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .matchParentSize()
-                    .blur(24.dp)
+                    .blur(16.dp),
+                contentScale = ContentScale.Crop
             )
 
-            // Semi-transparent overlay (optional for better readability)
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -80,7 +65,9 @@ fun SavedBooksScreen() {
             )
 
             Row(
-                modifier = Modifier.fillMaxHeight().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
@@ -88,19 +75,26 @@ fun SavedBooksScreen() {
                         .width(70.dp)
                         .height(100.dp)
                 ) {
-                    Image(painter = painterResource(R.drawable.ic_google_map), contentDescription = null)
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(width = 80.dp, height = 100.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        model = books.first().imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Column {
                     Text(
-                        text = "test",
+                        text = books.first().status?.value ?: "Favorites",
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White
                     )
                     Text(
-                        text = "4 stories",
+                        text = "${books.size} books",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
                     )
@@ -114,36 +108,38 @@ fun SavedBooksScreen() {
             contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            items(stories) { story ->
-                StoryItemView(story)
+            items(books) { story ->
+                BookShelfDetail(book = story, onNavigateToDetails = onNavigateToDetails)
             }
         }
     }
 }
 
 @Composable
-fun StoryItemView(story: StoryItem) {
+fun BookShelfDetail(book: BookUi, onNavigateToDetails: (String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 8.dp),
+            .padding(horizontal = 4.dp, vertical = 8.dp)
+            .clickable {
+                onNavigateToDetails(book.id)
+            },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        elevation = CardDefaults.cardElevation(defaultElevation = 20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     ) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Image(
-                painter = painterResource(R.drawable.ic_hide_view),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            AsyncImage(
                 modifier = Modifier
-                    .width(72.dp)
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(width = 72.dp, height = 100.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                model = book.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -153,10 +149,10 @@ fun StoryItemView(story: StoryItem) {
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = story.title,
+                    text = book.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -165,33 +161,21 @@ fun StoryItemView(story: StoryItem) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    IconText(Icons.Default.RemoveRedEye, story.views)
-                    IconText(Icons.Default.Star, story.likes)
-                    IconText(Icons.Default.List, story.chapters)
+                    IconText(Icons.Default.RemoveRedEye, book.readBy)
+                    IconText(Icons.Default.Star, book.votes)
+                    IconText(Icons.AutoMirrored.Filled.List, book.pages.toString())
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = story.description,
+                    text = book.aboutBook,
                     style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    story.tags.forEach { tag ->
-                        AssistChip(
-                            onClick = { /* handle tag */ },
-                            label = { Text(tag) }
-                        )
-                    }
-                }
             }
         }
     }
@@ -203,9 +187,9 @@ fun IconText(icon: ImageVector, text: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            icon,
+            imageVector = icon,
             contentDescription = null,
-            tint = Color.Gray,
+            tint = Color.Red.copy(alpha = 0.6f),
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
@@ -215,20 +199,4 @@ fun IconText(icon: ImageVector, text: String) {
             color = Color.Gray
         )
     }
-}
-
-// Small helper model
-data class StoryItem(
-    val title: String,
-    val views: String,
-    val likes: String,
-    val chapters: String,
-    val description: String,
-    val tags: List<String>
-)
-
-@Preview(showBackground = true)
-@Composable
-fun SavedBooksScreenPreview() {
-    SavedBooksScreen()
 }

@@ -1,5 +1,6 @@
 package com.tbc.bookli.presentation.screen.search
 
+import com.tbc.bookli.domain.model.BookStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,7 +15,7 @@ data class BookUi(
     val source: String?,
     val readBy: String,
     val pages: Int,
-    val status: String?,
+    val status: BookStatus?,
     val rating: Double,
     val votes: String,
     val reviews: List<ReviewUi>

@@ -40,7 +40,7 @@ import com.tbc.bookli.presentation.screen.profile.ProfileScreenRoute
 import com.tbc.bookli.presentation.screen.read.ReadScreen
 import com.tbc.bookli.presentation.screen.register.RegisterScreenRoute
 import com.tbc.bookli.presentation.screen.review.ReviewScreenRoute
-import com.tbc.bookli.presentation.screen.savedBooksScreen.SavedBooksScreen
+import com.tbc.bookli.presentation.screen.bookshelf_details.BookShelfDetails
 import com.tbc.bookli.presentation.screen.search.BookUi
 import com.tbc.bookli.presentation.screen.search.SearchScreenRoute
 import kotlin.reflect.typeOf
@@ -180,16 +180,25 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
 
                 composable<BookShelfScreen> {
                     BookShelfScreenRoute(
-                        onNavigateToSavedBookScreen = {
-                            navController.navigate(
-                                SavedBooksScreen
-                            )
+                        onNavigateToSavedBookScreen = { books ->
+                            navController.navigate(SavedBooksScreen(books))
                         }
                     )
                 }
-                composable<SavedBooksScreen> {
-                    SavedBooksScreen()
 
+                composable<SavedBooksScreen>(
+                    typeMap = mapOf(typeOf<List<BookUi>>() to serializableType<List<BookUi>>())
+                ) {
+                    val args = it.toRoute<SavedBooksScreen>()
+
+                    BookShelfDetails(
+                        books = args.books,
+                        onNavigateToDetails = { id ->
+                            navController.navigate(BookDetails(bookId = id)) {
+                                navController.popBackStack()
+                            }
+                        }
+                    )
                 }
 
                 composable<ReviewScreen>(

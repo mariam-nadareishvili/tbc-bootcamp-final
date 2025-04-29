@@ -4,6 +4,7 @@ import com.tbc.bookli.data.remote.model.BookDto
 import com.tbc.bookli.data.remote.model.RatingInfoDto
 import com.tbc.bookli.data.remote.model.ReviewDto
 import com.tbc.bookli.domain.model.Book
+import com.tbc.bookli.domain.model.BookStatus
 import com.tbc.bookli.domain.model.Review
 
 fun BookDto.toDomain(): Book {
@@ -18,7 +19,7 @@ fun BookDto.toDomain(): Book {
         source = source,
         readBy = readBy,
         pages = pages,
-        status = status,
+        status = BookStatus.from(status),
         rating = ratingInfo.rating,
         votes = ratingInfo.votes,
         reviews = ratingInfo.reviews.map { it.toDomain() }
@@ -47,7 +48,7 @@ fun Book.toDto(): BookDto {
         source = source,
         readBy = readBy,
         pages = pages,
-        status = status,
+        status = status?.value,
         ratingInfo = RatingInfoDto(
             rating = rating,
             votes = votes,

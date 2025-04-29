@@ -13,6 +13,7 @@ interface BookRepository {
     fun getStories(): Flow<Resource<List<Story>>>
     fun getGenres(): Flow<Resource<List<Genre>>>
     fun searchBooks(search: String): Flow<Resource<List<Book>>>
+    fun getAllBooks(): Flow<Resource<List<Book>>>
     fun getBookById(id: String): Flow<Resource<Book>>
     fun updateBookById(book: Book): Flow<Resource<Unit>>
 }

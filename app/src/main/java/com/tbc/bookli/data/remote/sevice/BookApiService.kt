@@ -30,6 +30,9 @@ interface BookApiService {
         @Query("search") search: String
     ): Response<List<BookDto>>
 
+    @GET("books-new")
+    suspend fun getAllBooks(): Response<List<BookDto>>
+
     @GET("books-new/{id}")
     suspend fun getBookById(@Path("id") bookId: String): Response<BookDto>
 

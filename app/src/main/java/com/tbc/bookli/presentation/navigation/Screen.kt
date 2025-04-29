@@ -28,7 +28,7 @@ data object SearchScreen : Screen
 data object ProfileScreen : Screen
 
 @Serializable
-data object SavedBooksScreen : Screen
+data class SavedBooksScreen (val books: List<BookUi>): Screen
 
 @Serializable
 data class ReviewScreen(val bookUi: BookUi) : Screen

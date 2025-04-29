@@ -1,12 +1,10 @@
 package com.tbc.bookli.presentation.screen.bookshelf
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,60 +13,58 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.tbc.bookli.R
+import com.tbc.bookli.domain.model.BookStatus
+import com.tbc.bookli.presentation.screen.bookshelf.BookShelfViewModel.BookShelfUiEvent
+import com.tbc.bookli.presentation.screen.search.BookUi
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun BookShelfScreenRoute(
-    onNavigateToSavedBookScreen: () -> Unit,
+    onNavigateToSavedBookScreen: (List<BookUi>) -> Unit,
     viewModel: BookShelfViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
+        viewModel.onEvent(BookShelfEvent.LoadBooks)
+
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
-                BookShelfViewModel.BookShelfUiEvent.NavigateToSavedBookScreen -> onNavigateToSavedBookScreen()
-                BookShelfViewModel.BookShelfUiEvent.OnBackPress -> {}
-                is BookShelfViewModel.BookShelfUiEvent.ShowError -> {}
+                is BookShelfUiEvent.NavigateToSavedBookScreen -> onNavigateToSavedBookScreen(event.books)
+                is BookShelfUiEvent.ShowError -> {}
             }
-
         }
     }
+
     BookShelfScreen(
         state = state,
-        onNavigateToSavedBookScreen = viewModel::navigateToSavedBookScreen
-
+        onEvent = viewModel::onEvent
     )
 }
 
 @Composable
 fun BookShelfScreen(
     state: BookShelfUiState,
-    onNavigateToSavedBookScreen: () -> Unit,
+    onEvent: (BookShelfEvent) -> Unit,
 ) {
-    val readingLists = listOf(
-        ReadingList("Favourite", 5, image = R.drawable.ic_man),
-        ReadingList("Reading", 3, image = R.drawable.ic_google_map),
-    )
-
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Library",
@@ -78,38 +74,59 @@ fun BookShelfScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(readingLists) { readingList ->
-                Column {
-                    ReadingListItem(
-                        readingList,
-                        onNavigateToSavedBookScreen = onNavigateToSavedBookScreen
+        Column {
+            ReadingListItem(
+                books = state.favoriteBooks,
+                title = BookStatus.Favorites.value,
+                onNavigateToSavedBookScreen = {
+                    onEvent(
+                        BookShelfEvent.NavigateToBookShelfDetails(status = BookStatus.Favorites)
                     )
-                    Spacer(Modifier.height(8.dp))
                 }
-            }
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+
+        Column {
+            ReadingListItem(
+                books = state.readingBooks,
+                title = BookStatus.Reading.value,
+                onNavigateToSavedBookScreen = {
+                    onEvent(
+                        BookShelfEvent.NavigateToBookShelfDetails(BookStatus.Reading)
+                    )
+                }
+            )
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-fun ReadingListItem(readingList: ReadingList, onNavigateToSavedBookScreen: () -> Unit) {
+fun ReadingListItem(
+    books: List<BookUi>,
+    title: String,
+    onNavigateToSavedBookScreen: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onNavigateToSavedBookScreen() }
-            .padding(8.dp),
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                if (books.isNotEmpty()) {
+                    onNavigateToSavedBookScreen()
+                }
+            }
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .width(90.dp)
-                .height(120.dp) // More vertical to match book style
+                .height(120.dp)
         ) {
-            // Back rectangle 2
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -117,7 +134,6 @@ fun ReadingListItem(readingList: ReadingList, onNavigateToSavedBookScreen: () ->
                     .background(Color.LightGray, shape = MaterialTheme.shapes.medium)
             )
 
-            // Back rectangle 1
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -125,19 +141,16 @@ fun ReadingListItem(readingList: ReadingList, onNavigateToSavedBookScreen: () ->
                     .background(Color.DarkGray, shape = MaterialTheme.shapes.medium)
             )
 
-            // Main "book cover" image
             Box(
                 modifier = Modifier
                     .matchParentSize()
             ) {
-                // Here, you can load the real image with AsyncImage or Image(painterResource())
-                Image(
+                AsyncImage(
+                    model = books.firstOrNull()?.imageUrl ?: R.drawable.ic_placeholder,
+                    contentDescription = null,
                     modifier = Modifier.clip(MaterialTheme.shapes.medium),
-                    painter = painterResource(readingList.image),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null
+                    contentScale = ContentScale.Crop
                 )
-
             }
         }
 
@@ -145,13 +158,13 @@ fun ReadingListItem(readingList: ReadingList, onNavigateToSavedBookScreen: () ->
 
         Column {
             Text(
-                text = readingList.title,
+                text = title,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${readingList.storyCount} books",
+                text = "${books.size} books",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
@@ -159,14 +172,8 @@ fun ReadingListItem(readingList: ReadingList, onNavigateToSavedBookScreen: () ->
     }
 }
 
-data class ReadingList(
-    val title: String,
-    val storyCount: Int,
-    val image: Int
-)
-
 @Preview(showBackground = true)
 @Composable
 fun BookShelfScreenPreview() {
-    BookShelfScreen(onNavigateToSavedBookScreen = {}, state = BookShelfUiState())
+    BookShelfScreen(onEvent = {}, state = BookShelfUiState())
 }

@@ -3,6 +3,7 @@ package com.tbc.bookli.presentation.screen.details
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tbc.bookli.common.Resource
+import com.tbc.bookli.domain.model.BookStatus
 import com.tbc.bookli.domain.useCase.GetBookByIdUseCase
 import com.tbc.bookli.domain.useCase.GetSearchBooksUseCase
 import com.tbc.bookli.domain.useCase.UpdateBookByIdUseCase
@@ -24,7 +25,7 @@ import javax.inject.Inject
 class BookDetailsViewModel @Inject constructor(
     private val getBookById: GetBookByIdUseCase,
     private val searchBooks: GetSearchBooksUseCase,
-    private val updateBookByIdUseCase: UpdateBookByIdUseCase
+    private val updateBookByIdUseCase: UpdateBookByIdUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BookDetailsUiState())
@@ -79,7 +80,7 @@ class BookDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun updateBookStatus(status: String?) {
+    private fun updateBookStatus(status: BookStatus?) {
         viewModelScope.launch(Dispatchers.IO) {
             val updatedBook = _state.value.bookDetails?.copy(status = status)
             updateBookByIdUseCase(book = updatedBook!!.toDomain()).collectLatest { result ->
@@ -89,7 +90,6 @@ class BookDetailsViewModel @Inject constructor(
                     }
 
                     is Resource.Success -> {
-                        println("${updatedBook.status}")
                         _state.update { it.copy(bookDetails = updatedBook) }
                     }
 

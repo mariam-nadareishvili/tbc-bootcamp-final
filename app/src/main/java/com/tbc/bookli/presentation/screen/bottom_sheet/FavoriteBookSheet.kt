@@ -22,11 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.draw.clip
+import com.tbc.bookli.domain.model.BookStatus
 
 @Composable
 fun FavoriteBookSheet(
-    onDone: (String) -> Unit,
-    initialSelection: BookListType = BookListType.FAVORITES
+    onDone: (BookStatus) -> Unit,
+    initialSelection: BookStatus = BookStatus.Favorites
 ) {
     var selectedList by remember { mutableStateOf(initialSelection) }
 
@@ -53,20 +54,20 @@ fun FavoriteBookSheet(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .clickable {
-                        onDone(selectedList.displayName)
+                        onDone(selectedList)
                     }
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            BookListType.entries.forEach { type ->
+            BookStatus.entries.forEach { type ->
                 FavoriteItem(
                     icon = when (type) {
-                        BookListType.FAVORITES -> Icons.Default.Star
-                        BookListType.READING -> Icons.Default.CollectionsBookmark
+                        BookStatus.Favorites -> Icons.Default.Star
+                        BookStatus.Reading -> Icons.Default.CollectionsBookmark
                     },
-                    title = type.displayName,
+                    title = type.value,
                     isSelected = type == selectedList,
                     onClick = { selectedList = type }
                 )
@@ -117,11 +118,6 @@ fun FavoriteItem(
             )
         }
     }
-}
-
-enum class BookListType(val displayName: String) {
-    FAVORITES("Favorites"),
-    READING("Reading")
 }
 
 
