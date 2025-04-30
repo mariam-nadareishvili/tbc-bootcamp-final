@@ -1,41 +1,99 @@
-# Bookly 📚
 
-**Bookly** is an Android application designed to help book lovers discover, manage, and rent books easily. It allows users to register, log in via Firebase, explore a variety of books and discover daily stories to inspire their reading journey. The app also integrates Google Maps to show available book stores near the user.
+# Bookli 📚
 
----
-
-## Features 🚀
-
-- **User Registration & Authentication**: Secure login and sign-up with Firebase Authentication.
-- **Profile Management**: Users can manage their profiles, including their personal information and preferences.
-- **Book Dashboard**: Fetch and display books along with daily stories and recommendations.
-- **Search**: Easily search books by title, author, or genre.
-- **Google Maps Integration**: View nearby stores that provide the books.
-- **Beautiful UI**: Featuring gradients and modern UI components to enhance user experience.
+**Bookli** is a modern Android app built with Jetpack Compose and Clean Architecture. It allows users to discover, read, organize, and review books. With a fully modularized structure, reactive UI, and robust architecture, Bookli is built for scalability and clarity.
 
 ---
 
-## Architecture 📐
+## 🏠 Features
 
-- **MVVM Architecture**: The app follows the Model-View-ViewModel (MVVM) design pattern, providing separation of concerns and promoting a clean architecture.
-- **Navigation**: Managed via the Navigation Graph to handle seamless transitions between screens and fragments.
+- ✨ Onboarding experience with interactive slides
+- 🔑 Secure login & registration
+- 📖 Book discovery and browsing by category
+- 🔍 Search functionality with real-time results
+- 🎓 Bookshelf to organize read/wishlist books
+- ⭐ Book detail & review screens
+- 👤 User profile with preferences
+- ⏳ Custom loader animations with Lottie
+- 🌐 Language & dark mode settings
+
+---
+
+## 🚀 Modular Architecture
+
+```bash
+:app
+:core:common           // Shared constants, helpers, UiText, resource files  
+:core:data             // Repositories, data sources, DTOs, API setup  
+:core:domain           // Use cases, domain models, repository interfaces  
+:core:di               // Hilt dependency injection modules  
+:core:ui               // Shared Composables, theme, UI models & mappers  
+
+:feature:intro  
+:feature:login  
+:feature:register  
+:feature:home  
+:feature:bookshelf  
+:feature:bookshelf_details  
+:feature:details  
+:feature:search  
+:feature:review  
+:feature:read  
+:feature:profile  
+:feature:splash
+```
 
 ---
 
-## Technologies & Libraries 🛠
+## 📊 Tech Stack
 
-This app leverages several Android libraries to provide a rich and responsive experience:
+### ✨ UI
+- [Jetpack Compose](https://developer.android.com/jetpack/compose) – Declarative UI Toolkit
+- [Material3](https://m3.material.io/) – Modern material design components
+- [Lottie Compose](https://github.com/airbnb/lottie-android) – For animations
+- [Accompanist](https://google.github.io/accompanist/) – Pager, permissions, system UI
+- [YCharts](https://github.com/yml-org/ycharts) – For beautiful charts
 
-### Core Libraries:
-- **Glide**: For image loading and caching.
-- **Firebase**: For Authentication, Firestore, and Storage.
-- **Google Maps API**: For displaying nearby book stores.
-- **Paging**: Efficiently load large datasets for books with pagination.
-- **Hilt**: For dependency injection to simplify class dependencies.
+### ⚙️ Architecture & DI
+- MVI Architecture – Unidirectional state & event flow
+- [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) – Dependency injection
+- [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) – Preferences & config
 
-### Navigation & UI:
-- **Material Design**: For modern and beautiful UI components.
-- **AndroidX Navigation**: To handle screen transitions efficiently.
-- **Core KTX**: To enhance the Android SDK with Kotlin extensions.
+### 🔐 Networking & Backend
+- [Retrofit](https://square.github.io/retrofit/) + Kotlinx Serialization
+- [OkHttp](https://square.github.io/okhttp/) + Logging Interceptor
+- [Firebase Auth](https://firebase.google.com/)
+
+### 🤖 Async + Data
+- [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
+- [Paging 3](https://developer.android.com/topic/libraries/architecture/paging/v3-overview)
+- [Kotlinx Datetime](https://github.com/Kotlin/kotlinx-datetime)
 
 ---
+
+## 🛠️ Setup & Build
+
+1. Clone the repo
+2. Open in Android Studio Hedgehog or newer
+3. Sync Gradle (uses version catalog)
+4. Run the app on API 24+
+
+> No special setup required. Firebase works out of the box.
+
+---
+
+## 🎨 Design & Patterns
+
+- Clean Architecture: **domain > data > presentation > UI**
+- **MVI pattern** for single-direction state & action flow
+- Modularization for feature isolation and scalability
+- `UiText` system for localization and translation
+- Lottie animations for polished user experience
+
+---
+
+> Built with passion by Mariam Nadareishvili ❤️
+
+---
+
+_“A reader lives a thousand lives before he dies . . . The man who never reads lives only one.”_
