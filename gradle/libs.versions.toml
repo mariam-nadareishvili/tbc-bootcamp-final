@@ -5,6 +5,8 @@ agp = "8.6.1"
 coreSplashscreen = "1.0.1"
 firebaseAuthKtx = "23.2.0"
 firebaseFirestoreKtx = "25.1.4"
+javaxInject = "1"
+kotlinxCoroutinesCore = "1.7.3"
 kotlinxDatetime = "0.5.0"
 lottieCompose = "6.4.0"
 mapsUtilsKtx = "3.4.0"
@@ -63,8 +65,10 @@ firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx", ve
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -103,3 +107,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 safe-args = { id = "androidx.navigation.safeargs", version.ref = "navigationFragmentKtx" }
 gms-google-services = { id = "com.google.gms.google-services", version.ref = "gmsGoogleServices" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }

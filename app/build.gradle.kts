@@ -54,9 +54,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
@@ -64,8 +61,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
-    implementation(libs.glide)
-    implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.okhttp)
@@ -74,9 +69,6 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.play.services.maps)
-    implementation(libs.play.services.location)
-    implementation(libs.maps.utils.ktx)
 
     // Compose UI
     implementation(libs.androidx.ui)
@@ -94,13 +86,8 @@ dependencies {
     // Hilt (If using Dependency Injection)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // Accompanist (optional for animations, permissions, etc.)
-    implementation(libs.accompanist.permissions)
-
     // Paging
     implementation(libs.androidx.paging.compose)
-    implementation(libs.androidx.paging.common.android)
-    implementation(libs.androidx.paging.runtime.ktx)
 
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
@@ -111,7 +98,22 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
-    implementation(libs.kotlinx.datetime)
 
-    implementation(libs.ycharts)
+    // Modules
+    implementation(project(":core:common"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:di"))
+    implementation(project(":feature:intro"))
+    implementation(project(":feature:splash"))
+    implementation(project(":feature:login"))
+    implementation(project(":feature:register"))
+    implementation(project(":feature:read"))
+    implementation(project(":feature:bookshelf_details"))
+    implementation(project(":feature:bookshelf"))
+    implementation(project(":feature:details"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:review"))
+    implementation(project(":feature:search"))
 }

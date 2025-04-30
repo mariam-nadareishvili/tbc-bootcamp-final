@@ -1,8 +1,7 @@
 package com.tbc.bookli.presentation.navigation
 
-import com.tbc.bookli.presentation.screen.search.BookUi
+import com.tbc.bookli.core.ui.model.BookUi
 import kotlinx.serialization.Serializable
-
 
 sealed interface Screen
 

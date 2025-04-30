@@ -9,7 +9,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tbc.bookli.presentation.helper.LocaleHelper
+import com.tbc.bookli.core.common.helper.LocaleHelper
+import com.tbc.bookli.core.ui.AppTheme
 import com.tbc.bookli.presentation.navigation.AppNavGraph
 import dagger.hilt.android.AndroidEntryPoint
 

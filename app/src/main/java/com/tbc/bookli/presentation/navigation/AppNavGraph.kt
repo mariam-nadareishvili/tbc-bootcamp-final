@@ -18,23 +18,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.tbc.bookli.presentation.helper.SnackbarManager
-import com.tbc.bookli.presentation.screen.bookshelf.BookShelfScreenRoute
-import com.tbc.bookli.presentation.screen.bookshelf_details.BookShelfDetails
-import com.tbc.bookli.presentation.screen.bottom_sheet.BottomSheetHost
-import com.tbc.bookli.presentation.screen.bottom_sheet.rememberBottomSheetController
-import com.tbc.bookli.presentation.screen.bottombar.BottomBar
-import com.tbc.bookli.presentation.screen.details.BookDetailsRoute
-import com.tbc.bookli.presentation.screen.home.HomeScreenRoute
-import com.tbc.bookli.presentation.screen.introduction.IntroductionRoute
-import com.tbc.bookli.presentation.screen.login.LoginScreenRoute
-import com.tbc.bookli.presentation.screen.profile.ProfileScreenRoute
-import com.tbc.bookli.presentation.screen.read.ReadScreen
-import com.tbc.bookli.presentation.screen.register.RegisterScreenRoute
-import com.tbc.bookli.presentation.screen.review.ReviewScreenRoute
-import com.tbc.bookli.presentation.screen.search.BookUi
-import com.tbc.bookli.presentation.screen.search.SearchScreenRoute
-import com.tbc.bookli.presentation.screen.splash.SplashRoute
+import com.tbc.bookli.core.ui.SnackbarManager
+import com.tbc.bookli.core.ui.model.BookUi
+import com.tbc.bookli.feature.intro.IntroductionRoute
+import com.tbc.bookli.feature.splash.SplashRoute
+import com.tbc.bookli.feature.bookshelf.BookShelfScreenRoute
+import com.tbc.bookli.feature.bookshelf_details.BookShelfDetails
+import com.tbc.bookli.presentation.component.BottomSheetHost
+import com.tbc.bookli.presentation.component.rememberBottomSheetController
+import com.tbc.bookli.presentation.component.BottomBar
+import com.tbc.bookli.feature.details.BookDetailsRoute
+import com.tbc.bookli.feature.home.HomeScreenRoute
+import com.tbc.bookli.feature.login.LoginScreenRoute
+import com.tbc.bookli.feature.profile.ProfileScreenRoute
+import com.tbc.bookli.feature.read.ReadScreen
+import com.tbc.bookli.feature.register.RegisterScreenRoute
+import com.tbc.bookli.feature.review.ReviewScreenRoute
+import com.tbc.bookli.feature.search.SearchScreenRoute
+import com.tbc.bookli.presentation.component.BottomNavItem
 import kotlinx.coroutines.flow.collectLatest
 import kotlin.reflect.typeOf
 
@@ -93,7 +94,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(
                 navController = navController,
-                startDestination = Splash,
+                startDestination = HomeScreen,
                 modifier = Modifier.fillMaxSize()
             ) {
                 composable<Splash> {
