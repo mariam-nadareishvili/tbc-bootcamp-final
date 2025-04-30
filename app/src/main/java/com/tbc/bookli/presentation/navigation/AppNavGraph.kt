@@ -94,7 +94,7 @@ fun AppNavGraph(navController: NavHostController = rememberNavController()) {
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(
                 navController = navController,
-                startDestination = HomeScreen,
+                startDestination = Splash,
                 modifier = Modifier.fillMaxSize()
             ) {
                 composable<Splash> {
